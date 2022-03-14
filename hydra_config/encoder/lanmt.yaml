@@ -1,0 +1,33 @@
+_target_: bo_protein.models.lanmt.LANMTWrapper
+name: lanmt
+
+model:
+  _target_: bo_protein.models.nn_models.mCNN
+  tokenizer: ${tokenizer}
+  max_len: ${task.max_len}
+  embed_dim: 64
+  latent_dim: 16
+  out_dim: 16
+  kernel_size: 5
+  p: 0.1
+  layernorm: True
+  max_len_delta: 0
+#model:
+#  _target_: bo_protein.models.nn_models.Transformer
+#  tokenizer: ${tokenizer}
+#  max_len: ${task.max_len}
+#  embed_dim: 64
+#  latent_dim: 16
+#  ff_dim: 256
+#  num_heads: 2
+#  num_layers: 4
+#  out_dim: 16
+#  p: 0.1
+#  max_len_delta: 4
+
+batch_size: 32
+num_epochs: 128
+patience: 32
+lr: 1e-3
+max_shift: 0
+mask_ratio: 0.125

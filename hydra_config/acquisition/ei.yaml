@@ -1,0 +1,3 @@
+_target_: bo_protein.acquisition.BatchEI
+num_samples: 2
+batch_size: ${task.batch_size}

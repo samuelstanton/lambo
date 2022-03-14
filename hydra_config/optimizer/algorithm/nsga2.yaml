@@ -1,0 +1,17 @@
+_target_: pymoo.algorithms.moo.nsga2.NSGA2
+pop_size: ${task.batch_size}
+n_offsprings: null
+sampling:
+  _target_: bo_protein.optimizers.sampler.CandidateSampler
+#  batch_size: 1
+crossover:
+  _target_: pymoo.factory.get_crossover
+  name: int_sbx
+  prob: 0.
+  eta: 16
+mutation:
+  _target_: bo_protein.optimizers.mutation.LocalMutation
+  prob: 1.
+  eta: 16
+  safe_mut: False
+eliminate_duplicates: True

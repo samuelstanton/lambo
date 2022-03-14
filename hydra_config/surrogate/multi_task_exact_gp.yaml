@@ -1,0 +1,49 @@
+_target_: bo_protein.models.gp_models.MultiTaskExactGP
+max_shift: 8
+mask_size: 0
+bootstrap_ratio: null
+min_num_train: 128
+task_noise_init: 0.25
+gp_lr: 5e-3
+enc_lr: 5e-3
+bs: ${encoder.batch_size}
+eval_bs: ${task.batch_size}
+num_epochs: 256
+holdout_ratio: 0.2
+early_stopping: True
+patience: 32
+eval_period: 2
+out_dim: ${task.obj_dim}
+feature_dim: 16
+encoder_wd: 1e-4
+rank: null
+task_covar_prior:
+  _target_: gpytorch.priors.LKJCovariancePrior
+  n: ${task.obj_dim}
+  eta: 2.
+  sd_prior:
+    _target_: gpytorch.priors.SmoothedBoxPrior
+    a: 1e-4
+    b: 1.0
+data_covar_module:
+  _target_: gpytorch.kernels.MaternKernel
+  ard_num_dims: ${surrogate.feature_dim}
+  lengthscale_prior:
+    _target_: gpytorch.priors.NormalPrior
+    loc: 0.7
+    scale: 1e-2
+#  lengthscale_prior:
+#    _target_: gpytorch.priors.GammaPrior
+#    concentration: 3.
+#    rate: 6.
+likelihood:
+  _target_: gpytorch.likelihoods.MultitaskGaussianLikelihood
+  num_tasks: ${task.obj_dim}
+  has_global_noise: False
+  noise_constraint:
+    _target_: gpytorch.constraints.GreaterThan
+    lower_bound: 1e-4
+#  noise_prior:
+#    _target_: gpytorch.priors.GammaPrior
+#    concentration: 1.1
+#    rate: 110

@@ -1,0 +1,29 @@
+_target_: bo_protein.models.sskernel_gp_model.SSKExactGP
+max_depth: 4
+gap_decay: 0.99
+match_decay: 0.99
+num_splits: 4
+max_shift: 0
+mask_size: 0
+bootstrap_ratio: null
+min_num_train: 2
+task_noise_init: 0.25
+gp_lr: 0.1
+enc_lr: null
+bs: 128
+eval_bs: ${task.batch_size}
+num_epochs: 16
+holdout_ratio: 0.2
+early_stopping: True
+patience: 4
+eval_period: 2
+out_dim: ${task.obj_dim}
+str_max_len: ${task.max_len}
+encoder_wd: 1e-4
+likelihood:
+  _target_: gpytorch.likelihoods.GaussianLikelihood
+  batch_shape:
+    - ${task.obj_dim}
+  noise_constraint:
+    _target_: gpytorch.constraints.GreaterThan
+    lower_bound: 1e-4

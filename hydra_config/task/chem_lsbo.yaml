@@ -1,0 +1,13 @@
+_target_: bo_protein.tasks.ChemTask
+obj_dim: 1
+obj_properties:
+  - penalized_logP
+log_prefix: chem_lsbo
+num_start_examples: 10000
+batch_size: 50
+max_num_edits: null
+max_len: 128 # max number of SELFIES tokens in ZINC
+max_ngram_size: 1
+allow_len_change: True
+worst_ratio: 0.
+best_ratio: 0.2

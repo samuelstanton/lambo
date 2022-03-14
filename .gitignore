@@ -1,0 +1,10 @@
+RNAfold
+Dockerfile
+ckpts
+wandb_config
+notebooks
+submit_batch.sh
+chem-env.yml
+bo_protein/assets/fpbase/Glowcap*
+bo_protein/assets/fpbase/proxy-rfp-task*
+hydra_config/hydra/launcher/ray_aws.yaml

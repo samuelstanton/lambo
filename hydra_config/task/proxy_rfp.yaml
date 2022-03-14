@@ -1,0 +1,9 @@
+_target_: bo_protein.tasks.ProxyRFPTask
+obj_dim: 2
+log_prefix: proxy_rfp
+batch_size: 16
+max_len: 244
+max_num_edits: null
+max_ngram_size: 1
+allow_len_change: False
+num_start_examples: 512

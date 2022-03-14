@@ -1,0 +1,10 @@
+# @package hydra.launcher
+_target_: hydra_plugins.hydra_ray_launcher.ray_launcher.RayLauncher
+ray:
+  init:
+    address: null
+    configure_logging: True
+    logging_level: error
+  remote:
+    num_cpus: 2
+    num_gpus: 1.

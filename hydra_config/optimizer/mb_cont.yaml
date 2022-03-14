@@ -1,0 +1,16 @@
+_target_: bo_protein.optimizers.cont_optimizer.ContinuousOptimizer
+_recursive_: False
+num_rounds: 64
+num_gens: 16
+num_opt_steps: 32
+patience: 32
+lr: 0.1
+concentrate_pool: 1
+mask_ratio: 0.125
+resampling_weight: 1.
+encoder_obj: lanmt
+optimize_latent: True
+position_sampler: uniform
+entropy_penalty: 0.
+window_size: 1
+latent_init: null

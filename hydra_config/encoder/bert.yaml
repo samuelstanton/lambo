@@ -1,0 +1,10 @@
+_target_: bo_protein.models.transformers.BERTWrapper
+name: bert
+out_dim: 16
+batch_size: 32
+finetune: False
+num_epochs: 64
+patience: 16
+lr: 1e-4
+mask_ratio: 0.125
+max_shift: 4
