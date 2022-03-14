@@ -1,4 +1,5 @@
-# Black-Box Optimization for Protein Design
+# 🏎️🏎️🏎️🏎️
+# LaMBO: Accelerating Bayesian Optimization for Protein Design with Denoising Autoencoders
 
 This project uses [Hydra](https://hydra.cc/) for configuration 
 and [Weight and Biases](https://docs.wandb.ai/) for logging.
