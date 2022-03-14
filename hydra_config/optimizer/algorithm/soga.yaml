@@ -1,0 +1,17 @@
+_target_: pymoo.algorithms.soo.nonconvex.ga.GA
+pop_size: 16
+#pop_size: ${task.batch_size}
+n_offsprings: null
+sampling:
+  _target_: bo_protein.optimizers.sampler.BatchSampler
+  batch_size: ${acquisition.batch_size}
+crossover:
+  _target_: bo_protein.optimizers.crossover.BatchCrossover
+  prob: 0.25
+  prob_per_query: 0.25
+mutation:
+  _target_: bo_protein.optimizers.mutation.LocalMutation
+  prob: 1.
+  eta: 16
+  safe_mut: False
+eliminate_duplicates: True

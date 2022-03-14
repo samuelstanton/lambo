@@ -1,0 +1,29 @@
+defaults:
+  - logger: local
+  - task: regex
+  - acquisition: greedy
+  - encoder: lanmt
+  - optimizer: mb_genetic
+  - optimizer/algorithm: nsga2
+  - tokenizer: protein
+  - surrogate: deep_ensemble
+
+seed: ${trial_id}
+trial_id: 0
+project_name: bo-protein
+version: v0.1.3
+
+# Directories for loading and storing data
+data_dir: data/experiments
+exp_name: test
+job_name: null
+timestamp: ${now:%Y-%m-%d_%H-%M-%S}
+log_dir: ${data_dir}/${exp_name}
+wandb_mode: online
+
+hydra:
+  run:
+    dir: ./${log_dir}
+  sweep:
+    dir: ./${log_dir}
+    subdir: .

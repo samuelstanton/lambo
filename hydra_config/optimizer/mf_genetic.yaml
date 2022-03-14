@@ -1,0 +1,24 @@
+_target_: bo_protein.optimizers.pymoo.ModelFreeGeneticOptimizer
+_recursive_: False
+num_rounds: 32
+num_gens: 2
+seed: ${seed}
+concentrate_pool: 1
+residue_sampler: uniform
+resampling_weight: 1.
+#algorithm:
+#  _target_: pymoo.algorithms.moo.nsga2.NSGA2
+#  pop_size: ${task.batch_size}
+#  n_offsprings: null
+#  sampling:
+#    _target_: bo_protein.optimizers.sampler.CandidateSampler
+#  crossover:
+#    _target_: pymoo.factory.get_crossover
+#    name: int_sbx
+#    prob: 0.
+#    eta: 16
+#  mutation:
+#    _target_: bo_protein.optimizers.mutation.LocalMutation
+#    prob: 1.
+#    eta: 16
+#  eliminate_duplicates: True

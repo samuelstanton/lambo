@@ -1,0 +1,13 @@
+_target_: bo_protein.tasks.RegexTask
+regex_list:
+  - "(?=A)"
+  - "(?=V)"
+obj_dim: 2
+log_prefix: regex
+min_len: 16
+max_len: 18
+num_start_examples: 512
+batch_size: 16
+max_num_edits: null
+max_ngram_size: 1
+allow_len_change: True

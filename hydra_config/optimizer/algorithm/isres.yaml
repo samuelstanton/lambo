@@ -1,0 +1,9 @@
+_target_: pymoo.algorithms.soo.nonconvex.isres.ISRES
+n_offsprings: 16
+pop_size: 8
+gamma: 0.85
+alpha: 0.2
+sampling:
+  _target_: bo_protein.optimizers.sampler.BatchSampler
+  batch_size: ${task.batch_size}
+eliminate_duplicates: True

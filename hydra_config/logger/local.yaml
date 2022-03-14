@@ -1,0 +1,2 @@
+_target_: upcycle.logging.DataFrameLogger
+log_dir: ${log_dir}/${job_name}/${timestamp}

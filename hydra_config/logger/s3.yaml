@@ -1,0 +1,3 @@
+_target_: upcycle.logging.S3Logger
+log_dir: projects/${project_name}/${log_dir}/${job_name}/${timestamp}
+bucket_name: samuel-stanton-personal-bucket

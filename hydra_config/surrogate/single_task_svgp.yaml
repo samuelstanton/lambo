@@ -1,0 +1,42 @@
+_target_: bo_protein.models.gp_models.SingleTaskSVGP
+max_shift: 8
+mask_size: 0
+bootstrap_ratio: null
+min_num_train: 128
+task_noise_init: 0.5
+lengthscale_init: 0.7
+gp_lr: 1e-3
+enc_lr: 1e-3
+bs: ${encoder.batch_size}
+eval_bs: ${task.batch_size}
+num_epochs: 128
+holdout_ratio: 0.2
+early_stopping: True
+patience: 16
+eval_period: 2
+feature_dim: 16
+out_dim: ${task.obj_dim}
+num_inducing_points: 64
+learn_inducing_points: True
+encoder_wd: 1e-4
+mll_beta: 1e-2
+#covar_module:
+#  _target_: gpytorch.kernels.MaternKernel
+#  ard_num_dims: ${surrogate.feature_dim}
+#  batch_shape:
+#    - ${task.obj_dim}
+lengthscale_prior:
+  _target_: gpytorch.priors.NormalPrior
+  loc: ${surrogate.lengthscale_init}
+  scale: 1e-2
+noise_constraint:
+  _target_: gpytorch.constraints.GreaterThan
+  lower_bound: 1e-4
+#likelihood:
+#  _target_: gpytorch.likelihoods.MultitaskGaussianLikelihood
+#  num_tasks: ${task.obj_dim}
+#  has_global_noise: False
+#  noise_prior:
+#    _target_: gpytorch.priors.GammaPrior
+#    concentration: 1.1
+#    rate: 1100

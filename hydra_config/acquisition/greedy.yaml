@@ -1,0 +1,3 @@
+_target_: bo_protein.acquisition.ExpectedObjVal
+num_samples: 2
+batch_size: 1

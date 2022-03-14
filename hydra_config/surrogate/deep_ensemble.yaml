@@ -1,0 +1,37 @@
+_target_: bo_protein.models.surrogates.DeepEnsemble
+model: mCNN
+model_kwargs:
+  embed_dim: 64
+  latent_dim: 16
+  out_dim: ${task.obj_dim}
+  kernel_size: 5
+  p: 0.1
+  layernorm: True
+  max_len: ${task.max_len}
+  max_len_delta: 0
+
+#model: Transformer
+#model_kwargs:
+#  max_len: ${task.max_len}
+#  embed_dim: 128
+#  latent_dim: 16
+#  ff_dim: 512
+#  num_heads: 4
+#  num_layers: 8
+#  out_dim: ${task.obj_dim}
+#  p: 0.1
+#  max_len_delta: 4
+
+ensemble_size: 4
+num_epochs: 256
+eval_period: 2
+bootstrap_ratio: 0.632
+min_num_train: 128
+weight_decay: 1e-4
+holdout_ratio: 0.2
+early_stopping: True
+lr: 1e-3
+bs: 32
+patience: 32
+max_shift: 8
+mask_size: 0
