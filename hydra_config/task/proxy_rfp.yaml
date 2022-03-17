@@ -1,4 +1,4 @@
-_target_: bo_protein.tasks.ProxyRFPTask
+_target_: bo_protein.tasks.proxy_rfp.proxy_rfp.ProxyRFPTask
 obj_dim: 2
 log_prefix: proxy_rfp
 batch_size: 16

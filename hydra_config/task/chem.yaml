@@ -1,4 +1,4 @@
-_target_: bo_protein.tasks.ChemTask
+_target_: bo_protein.tasks.chem.chem.ChemTask
 obj_dim: 2
 obj_properties:
   - logP
