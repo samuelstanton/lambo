@@ -1,7 +1,8 @@
 from Bio import PDB
 from pathlib import Path
 from bo_protein.foldx_data.foldx import FoldxManager
-from bo_protein.utils import FoldxMutation
+from bo_protein.candidate import pdb_to_residues
+from bo_protein.utils import FoldxMutation, RESIDUE_ALPHABET, IntTokenizer
 
 
 class SelectChains(PDB.Select):
@@ -38,35 +39,44 @@ def extract_chain(path, chain="A"):
     return out_path
 
 
-def test_foldx(pdb_loc):
-    pdb_path = extract_chain(pdb_loc, chain="A")
+def test_foldx():
+    test_dir = Path(__file__).parent.resolve()
+    test_pdb_asset = (test_dir / "./files/1ggx.pdb")
+    pdb_path = extract_chain(test_pdb_asset, chain="A")
     work_dir = Path(__file__).parent / "tmp"
-    work_dir.mkdir(exist_ok=True)
+    work_dir.mkdir(parents=True, exist_ok=True)
+
+    residue_seq, pos_seq = pdb_to_residues(pdb_path, chain_id='A')
+    print(residue_seq)
+    print(pos_seq)
 
     # Create FoldX Manager and initialize working directory
     # Note there is a default foldx directory in the user space,
     # set it manually if needed
     foldx_manager = FoldxManager(wt_pdb=pdb_path, work_dir=work_dir)
 
+    #
+    tokenizer = IntTokenizer(RESIDUE_ALPHABET, RESIDUE_ALPHABET)
+
     # Note that the first 6 amino acids are not included in the crystallographic model
     # So the first mutatable residue is number 7
     # Here is how we would pass 2 mutations to the FoldX manager
     mutation_list = [
-        FoldxMutation(old_token_idx="V", chain="A", token_pos=7, new_token_idx="G"),
-        FoldxMutation(old_token_idx="K", chain="A", token_pos=9, new_token_idx="L"),
+        FoldxMutation(
+            old_token_idx=tokenizer.encode("V")[1],
+            chain="A",
+            token_pos=pos_seq[0],
+            new_token_idx=tokenizer.encode("G")[1],
+            tokenizer=tokenizer
+        ),
+        FoldxMutation(
+            old_token_idx=tokenizer.encode("K")[1],
+            chain="A",
+            token_pos=pos_seq[2],
+            new_token_idx=tokenizer.encode("L")[1],
+            tokenizer=tokenizer
+        ),
     ]
-    ddG = foldx_manager(mutation_list)
-    print(f"{ddG} kcal/mol")
-
-    # And Again
-    mutation_list = [
-        FoldxMutation(old_token_idx="V", chain="A", token_pos=7, new_token_idx="L"),
-        FoldxMutation(old_token_idx="K", chain="A", token_pos=9, new_token_idx="G"),
-    ]
-    ddG = foldx_manager(mutation_list)
+    ddG = foldx_manager(mutation_list, id='1ggx')
     print(f"{ddG} kcal/mol")
     print(f"full cache saved at  {foldx_manager.cache_out}")
-
-
-if __name__ == "__main__":
-    test_foldx("./tests/files/1ggx.pdb")

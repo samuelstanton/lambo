@@ -8,10 +8,12 @@ from Bio.SeqUtils import seq1
 
 from bo_protein.utils import StringSubstitution, StringDeletion, StringInsertion, FoldxMutation
 
+
 def apply_mutation(base_seq, mut_pos, mut_res, tokenizer):
     tokens = tokenizer.decode(tokenizer.encode(base_seq)).split(" ")[1:-1]
     mut_seq = "".join(tokens[:mut_pos] + [mut_res] + tokens[(mut_pos + 1):])
     return mut_seq
+
 
 def pdb_to_residues(pdb_path, chain_id='A'):
     """

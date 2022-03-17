@@ -10,7 +10,7 @@ def check_candidates(b_seq, n_seq, manual_cand, auto_cand):
     assert manual_cand.mutant_residue_seq == n_seq
 
 
-VOCAB = ['A', 'B', 'C', 'D', 'E', 'F', '[PAD]', '[MASK]', '[UNK]']
+VOCAB = ['A', 'B', 'C', 'D', 'E', 'F', '[PAD]', '[MASK]', '[UNK]', '[CLS]', '[SEP]']
 
 
 def test_string_substitution():

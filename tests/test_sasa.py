@@ -1,10 +1,14 @@
+from pathlib import Path
+
 from bo_protein.bp_data.sasa import SurfaceArea
 
-def test_sasa_forwards(loc):
+
+def test_sasa_forwards():
+    test_dir = Path(__file__).parent.resolve()
+    test_pdb_asset = (test_dir / "./files/1ggx.pdb").as_posix()
+
     sasa = SurfaceArea()
 
-    name = loc.split(".")[-2].split("/")[-1]
-    value = sasa(name, loc)
-    print("Successfully computed surface area: ", value)
-
-test_sasa_forwards("./files/1ggx.pdb")
+    name = test_pdb_asset.split(".")[-2].split("/")[-1]
+    value = sasa(name, test_pdb_asset)
+    assert isinstance(value, float)

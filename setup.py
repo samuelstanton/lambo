@@ -5,10 +5,10 @@ import sys
 _here = os.path.abspath(os.path.dirname(__file__))
 
 if sys.version_info[0] < 3:
-    with open(os.path.join(_here, "README.rst")) as f:
+    with open(os.path.join(_here, "README.md")) as f:
         long_description = f.read()
 else:
-    with open(os.path.join(_here, "README.rst"), encoding="utf-8") as f:
+    with open(os.path.join(_here, "README.md"), encoding="utf-8") as f:
         long_description = f.read()
 
 #TODO: read this in properly
@@ -28,20 +28,24 @@ install_requires = [
     # "biopython>=1.79",
 ]
 
+desc = "Code to reproduce experiments from Accelerating Bayesian Optimization for Protein Design" \
+       "with Denoising Autoencoders"
+
 setup(
-    name="bo_protein",
-    version="alpha",
-    description=("Repo for MOBO with proteins"),
+    name="lambo",
+    version="0.1.3",
+    description=desc,
     long_description=long_description,
-    author="",
-    author_email="",
-    url="",
-    license="MPL-2.0",
+    long_description_content_type='text/markdown',
+    author="Samuel Stanton, Wesley Maddox, and Nate Gruver",
+    author_email="ss13641@nyu.edu",
+    url="https://github.com/samuelstanton/lambo.git",
+    license="Apache-2.0",
     packages=["bo_protein"],
     install_requires=install_requires,
     include_package_data=True,
     classifiers=[
-        "Development Status :: 0",
+        "Development Status :: 3",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3.7",
     ],

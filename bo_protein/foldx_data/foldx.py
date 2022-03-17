@@ -175,7 +175,7 @@ class FoldxManager:
         id = uuid.uuid4().hex if id is None else id
         self.cache[id] = mutation_list
         subdir = self.work_dir / id
-        subdir.mkdir()
+        subdir.mkdir(exist_ok=True)
         self._create_foldx_mutation_list(subdir / "individual_list.txt", mutation_list)
 
         foldx_cmd = (
@@ -196,6 +196,7 @@ class FoldxManager:
     @staticmethod
     def read_result(foldx_dir):
         """Get ddG result from subdir in kcal/mol"""
+        print(foldx_dir)
         try:
             with open(Path(foldx_dir) / "Raw_wt_input_Repair.fxout", "r") as f:
                 mutant_metrics, wild_metrics = f.readlines()[-2:]
