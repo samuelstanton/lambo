@@ -1,4 +1,4 @@
-_target_: lambo.optimizers.cont_optimizer.LaMBO
+_target_: lambo.optimizers.lambo.LaMBO
 _recursive_: False
 num_rounds: 64
 num_gens: 16
@@ -8,9 +8,9 @@ lr: 0.1
 concentrate_pool: 1
 mask_ratio: 0.125
 resampling_weight: 1.
-encoder_obj: lanmt
+encoder_obj: mlm
 optimize_latent: True
 position_sampler: uniform
-entropy_penalty: 0.
+entropy_penalty: 1e-2
 window_size: 1
 latent_init: null

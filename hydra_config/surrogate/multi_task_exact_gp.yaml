@@ -1,5 +1,5 @@
 _target_: lambo.models.gp_models.MultiTaskExactGP
-max_shift: 8
+max_shift: 0
 mask_size: 0
 bootstrap_ratio: null
 min_num_train: 128

@@ -21,5 +21,5 @@ early_stopping: True
 lr: 1e-3
 bs: 32
 patience: 32
-max_shift: 8
+max_shift: 0
 mask_size: 0

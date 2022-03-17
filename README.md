@@ -26,21 +26,38 @@ pip install -e .
 
 ## Running the code
 
-Example commands:
+We recommend running NSGA-2 first to test your installation
 
 ```bash
-python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 task=regex 
+python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 task=regex tokenizer=protein
 ```
 
+For the model-based genetic baseline, run
 ```bash
-python scripts/black_box_opt.py surrogate=deep_ensemble acquisition=ehvi optimizer=mb_genetic optimizer/algorithm=soga 
-task=proxy_rfp
+python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga
+task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
+For the full LaMBO algorithm, run
 ```bash
-python scripts/black_box_opt.py surrogate=multi_task_exact_gp acquisition=greedy optimizer=mb_genetic 
-optimizer/algorithm=nsga2 task=proxy_rfp optimizer.algorithm.residue_sampler=esm
+python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=mlm
+task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
+
+To evaluate on the multi-objective RFP (large-molecule) or ZINC (small-molecule),
+use the `task=proxy_rfp tokenizer=protein` and `task=chem tokenizer=selfies` overrides,
+respectively.
+
+To evaluate on the single-objective ZINC task used in papers like
+[Tripp et al (2020)](https://proceedings.neurips.cc/paper/2020/hash/81e3225c6ad49623167a4309eb4b2e75-Abstract.html),
+run
+
+```bash
+python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt
+task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei
+```
+
+
 
 Below we list significant configuration options.
 See the config files in `./hydra_config` for all configurable parameters.
@@ -70,8 +87,8 @@ Note that any config field can be overridden from the command line, and some con
 #### Surrogate options
 - `multi_task_exact_gp` (default, DKL MTGP regression)
 - `single_task_svgp` (DKL SVGP regression)
-- `string_kernel_exact_gp` (SSK GP regression)
 - `single_task_exact_gp` (DKL GP regression)
+- `string_kernel_exact_gp` (not recommended, SSK GP regression)
 - `deep_ensemble` (MLE regression)
 
 #### Task options

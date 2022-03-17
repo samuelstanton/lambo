@@ -2,7 +2,7 @@ _target_: lambo.models.lm_elements.LanguageModel
 name: lanmt_cnn
 
 model:
-  _target_: lambo.models.nn_models.mCNN
+  _target_: lambo.models.shared_elements.mCNN
   tokenizer: ${tokenizer}
   max_len: ${task.max_len}
   embed_dim: 64

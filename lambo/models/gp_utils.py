@@ -17,7 +17,7 @@ from botorch.models import SingleTaskGP, KroneckerMultiTaskGP
 from lambo.utils import draw_bootstrap, to_tensor, weighted_resampling, batched_call
 from lambo import transforms as gfp_transforms
 from lambo.models.shared_elements import check_early_stopping
-from lambo.models.mlm import mlm_train_step, mlm_eval_epoch, MLMWrapper
+from lambo.models.mlm import mlm_train_step, mlm_eval_epoch
 from lambo.models.lanmt import lanmt_eval_epoch, lanmt_train_step
 from lambo.models.lm_elements import LanguageModel
 
@@ -213,7 +213,7 @@ def fit_gp_surrogate(
         for inputs, targets in train_loader:
 
             # train encoder through unsupervised MLM objective
-            if isinstance(surrogate.encoder, (MLMWrapper, LanguageModel)) and encoder_obj == 'mlm':
+            if isinstance(surrogate.encoder, LanguageModel) and encoder_obj == 'mlm':
                 surrogate.encoder.requires_grad_(True)
                 mlm_loss, _, _ = mlm_train_step(
                     surrogate.encoder, gp_optimizer, inputs, surrogate.encoder.mask_ratio, loss_scale=1.
