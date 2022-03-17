@@ -1,3 +1,3 @@
-_target_: bo_protein.acquisition.NoisyEHVI
+_target_: bo_protein.acquisitions.ehvi.NoisyEHVI
 num_samples: 2
 batch_size: ${task.batch_size}
