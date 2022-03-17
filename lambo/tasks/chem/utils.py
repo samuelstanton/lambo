@@ -4,6 +4,7 @@ import pandas as pd
 from rdkit import RDLogger
 import selfies as sf
 import math
+from pathlib import Path
 
 RDLogger.DisableLog('rdApp.*')
 
@@ -44,8 +45,10 @@ CUSTOM_SAMPLING_VOCAB = [
 class ChemWrapperModule:
 
     def __init__(self, num_start_examples=10000, worst_ratio=1., best_ratio=0.):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        self.df = pd.read_csv(os.path.join(dir_path, "zinc.csv"))
+        file_loc = os.path.dirname(os.path.realpath(__file__))
+        root_path = Path(file_loc).parents[1]
+        zinc_asset_path = root_path / "assets" / "zinc.csv"
+        self.df = pd.read_csv(os.path.join(zinc_asset_path))
 
         self.n_start_points = num_start_examples
         self.n_worst_points = math.ceil(num_start_examples * worst_ratio)
@@ -65,17 +68,9 @@ class ChemWrapperModule:
         ranks, _, _ = weighted_resampling(-obj_vals)
         rank_argsort = ranks.argsort()
 
-        # prop_argsorts = []
-        # for prop_name in property_list:
-        #     prop_argsorts.append(np.argsort(self.df[prop_name].values))
-
         chosen_idxs = []
         for row_idx in range(self.n_worst_points):
             chosen_idxs.append(rank_argsort[row_idx])
-            # for p_argsrt in prop_argsorts:
-            #     select_idx = p_argsrt[rank_idx]
-            #     if select_idx not in chosen_idxs:
-            #         chosen_idxs.append(select_idx)
             if len(chosen_idxs) >= self.n_worst_points:
                 chosen_idxs = chosen_idxs[:self.n_worst_points]
                 break
@@ -94,16 +89,8 @@ class ChemWrapperModule:
         ranks, _, _ = weighted_resampling(obj_vals)
         rank_argsort = ranks.argsort()
 
-        # prop_argsorts = []
-        # for prop_name in property_list:
-        #     prop_argsorts.append(np.argsort(-self.df[prop_name].values))
-
         chosen_idxs = []
         for row_idx in range(self.n_best_points):
-            # for p_argsrt in prop_argsorts:
-            #     select_idx = p_argsrt[rank_idx]
-            #     if select_idx not in chosen_idxs:
-            #         chosen_idxs.append(select_idx)
             chosen_idxs.append(rank_argsort[row_idx])
             if len(chosen_idxs) >= self.n_best_points:
                 chosen_idxs = chosen_idxs[:self.n_best_points]
@@ -162,14 +149,8 @@ class SMILESTokenizer:
 
         with open(os.path.join(dir_path,"restricted_vocab.txt"), 'r') as fd:
             self.non_special_vocab = [x.strip() for x in fd.readlines()]
-            # restricted_vocab = [x.strip() for x in fd.readlines()]
 
         self.tokenizer = tokenizer
-
-        # self.full_vocab = tokenizer.all_special_tokens + restricted_vocab
-
-        # non_special_start = self.full_vocab.index(self.tokenizer.all_special_tokens[-1]) + 1
-        # self.non_special_vocab = restricted_vocab
 
         self.converter = IntTokenizer(self.non_special_vocab, self.full_vocab)
         self.padding_idx = self.converter.padding_idx

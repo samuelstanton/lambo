@@ -11,8 +11,6 @@ from pymoo.factory import get_termination, get_performance_indicator
 from pymoo.optimize import minimize
 
 from lambo.tasks.surrogate_task import SurrogateTask
-from lambo.models.transformers import ESMWrapper, BERTWrapper
-from lambo.models.mlm import MLMWrapper
 from lambo.models.lm_elements import LanguageModel
 from lambo.utils import weighted_resampling, DataSplit, update_splits, safe_np_cat
 
@@ -117,14 +115,8 @@ class SequentialGeneticOptimizer(object):
 
         if self.residue_sampler == 'uniform':
             mlm_obj = None
-        elif self.residue_sampler == 'tape_bert':
-            assert isinstance(encoder, BERTWrapper)
-            mlm_obj = encoder
-        elif self.residue_sampler == 'esm_bert':
-            assert isinstance(encoder, ESMWrapper)
-            mlm_obj = encoder
         elif self.residue_sampler == 'mlm':
-            assert isinstance(encoder, (MLMWrapper, LanguageModel))
+            assert isinstance(encoder, LanguageModel)
             mlm_obj = encoder
         else:
             raise ValueError

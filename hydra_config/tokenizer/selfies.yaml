@@ -1,1 +1,1 @@
-_target_: lambo.chem_data.utils.SELFIESTokenizer
+_target_: lambo.tasks.chem.utils.SELFIESTokenizer

@@ -16,7 +16,7 @@ desc = "Code to reproduce experiments from Accelerating Bayesian Optimization fo
 
 setup(
     name="lambo",
-    version="0.1.3",
+    version="0.2.0",
     description=desc,
     long_description=long_description,
     long_description_content_type='text/markdown',

@@ -24,13 +24,12 @@ pip install -e .
 ```
 
 
-
-## Data collection
+## Running the code
 
 Example commands:
 
 ```bash
-python scripts/black_box_opt.py optimizer=mf_genetic task=regex
+python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 task=regex 
 ```
 
 ```bash
@@ -43,30 +42,50 @@ python scripts/black_box_opt.py surrogate=multi_task_exact_gp acquisition=greedy
 optimizer/algorithm=nsga2 task=proxy_rfp optimizer.algorithm.residue_sampler=esm
 ```
 
-#### Task options
-- `regex` (default)
-- `chem` (ZINC small molecules, multi-objective)
-- `chem` (ZINC small molecules, single-objective)
-- `proxy_rfp` (FPBase large molecules, multi-objective)
+Below we list significant configuration options.
+See the config files in `./hydra_config` for all configurable parameters.
+Note that any config field can be overridden from the command line, and some configurations are not supported. 
+
+#### Acquisition options
+- `nehvi` (default, multi-objective)
+- `ehvi` (multi-objective)
+- `ei` (single-objective)
+- `greedy` (single and multi-objective)
+
+#### Encoder options
+- `mlm_cnn` (default, substitutions only)
+- `mlm_transformer` (substitutions only)
+- `lanmt_cnn` (substitutions, insertions, deletions)
+- `lanmt_transformer` (substitutions, insertions, deletions)
 
 #### Optimizer options
 - `lambo` (default)
-- `mb_genetic`
-- `mf_genetic`
+- `mb_genetic` (Genetic baseline with model-based compound screening)
+- `mf_genetic` (Model-free genetic baseline)
 
 #### Algorithm options
-- `soga` (single-objective)
-- `nsga2` (default, multi-objective)
+- `soga` (default, single-objective)
+- `nsga2` (multi-objective)
 
 #### Surrogate options
-- `deep_ensemble` (default)
-- `single_task_exact_gp`
-- `multi_task_exact_gp`
-- `single_task_svgp`
+- `multi_task_exact_gp` (default, DKL MTGP regression)
+- `single_task_svgp` (DKL SVGP regression)
+- `string_kernel_exact_gp` (SSK GP regression)
+- `single_task_exact_gp` (DKL GP regression)
+- `deep_ensemble` (MLE regression)
 
-#### Acquisition options
-- `greedy` (default)
-- `ehvi`
+#### Task options
+- `regex` (default, maximize counts of 3 bigrams)
+- `regex_easy` (maximize counts of 2 tokens)
+- `chem` (ZINC small molecules, maximize LogP and QED)
+- `chem_lsbo` (ZINC small molecules, maximize penalized LogP)
+- `proxy_rfp` (FPBase large molecules, maximize stability and SASA)
+
+#### Tokenizer options
+- `protein` (default, amino acid vocab for large molecules)
+- `selfies` (ZINC-derived SELFIES vocab for small molecules)
+- `smiles` (not recommended, ZINC-derived SMILES vocab for small molecules)
+
 
 ## Data analysis
 

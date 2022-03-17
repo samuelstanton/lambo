@@ -5,7 +5,6 @@ import torch
 import torchvision
 import wandb
 
-from torch import nn as nn
 from torch.nn import functional as F
 from torch import LongTensor
 

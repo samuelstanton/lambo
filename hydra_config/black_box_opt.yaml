@@ -1,17 +1,17 @@
 defaults:
   - logger: local
   - task: regex
-  - acquisition: greedy
-  - encoder: lanmt
-  - optimizer: mb_genetic
-  - optimizer/algorithm: nsga2
+  - acquisition: nehvi
+  - encoder: mlm_cnn
+  - optimizer: lambo
+  - optimizer/algorithm: soga
   - tokenizer: protein
-  - surrogate: deep_ensemble
+  - surrogate: multi_task_exact_gp
 
 seed: ${trial_id}
 trial_id: 0
-project_name: bo-protein
-version: v0.1.3
+project_name: lambo
+version: v0.2.0
 
 # Directories for loading and storing data
 data_dir: data/experiments

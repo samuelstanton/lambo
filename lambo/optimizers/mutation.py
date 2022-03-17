@@ -6,7 +6,7 @@ from pymoo.factory import get_mutation
 from pymoo.core.mutation import Mutation
 
 from lambo import utils
-from lambo.tasks.chem.utils import prop_func
+from lambo.tasks.chem.logp import prop_func
 from lambo.models.mlm import sample_tokens
 
 

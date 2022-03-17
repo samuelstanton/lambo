@@ -5,7 +5,7 @@ import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
 
-from lambo.models.lanmt import fit_lanmt_model
+# from lambo.models.lanmt import fit_lanmt_model
 from lambo.models.masked_layers import mResidualBlock
 
 
@@ -36,20 +36,20 @@ class LanguageModel(nn.Module):
         )
         return lat_tok_features, pooled_features
 
-    def fit(self, train_seqs, weights=None, num_epochs=None, log_prefix='lanmt'):
-        num_epochs = self.num_epochs if num_epochs is None else num_epochs
-        records = fit_lanmt_model(
-            model=self.model,
-            train_seqs=train_seqs,
-            num_epochs=num_epochs,
-            batch_size=self.batch_size,
-            lr=self.lr,
-            patience=self.patience,
-            max_shift=self.max_shift,
-            weights=weights,
-            log_prefix=log_prefix,
-        )
-        return records
+    # def fit(self, train_seqs, weights=None, num_epochs=None, log_prefix='lanmt'):
+    #     num_epochs = self.num_epochs if num_epochs is None else num_epochs
+    #     records = fit_lanmt_model(
+    #         model=self.model,
+    #         train_seqs=train_seqs,
+    #         num_epochs=num_epochs,
+    #         batch_size=self.batch_size,
+    #         lr=self.lr,
+    #         patience=self.patience,
+    #         max_shift=self.max_shift,
+    #         weights=weights,
+    #         log_prefix=log_prefix,
+    #     )
+    #     return records
 
     def get_token_idx(self, token):
         return self.model.tokenizer.convert_token_to_id(token)
