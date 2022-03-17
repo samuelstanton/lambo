@@ -1,4 +1,4 @@
-_target_: bo_protein.optimizers.cont_optimizer.ContinuousOptimizer
+_target_: bo_protein.optimizers.cont_optimizer.LaMBO
 _recursive_: False
 num_rounds: 64
 num_gens: 16

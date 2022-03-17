@@ -1,8 +1,6 @@
 import numpy as np
 from pymoo.core.sampling import Sampling
 
-import bo_protein.utils as utils
-
 
 from bo_protein.optimizers.mutation import get_mlm_mutation, safe_vocab_mutation
 
@@ -27,7 +25,6 @@ def _draw_samples(tokenizer, cand_pool, problem, num_samples, mlm_obj=None, safe
         # x1.append(np.random.randint(1, num_tokens - 1))
     x1 = np.array(x1)
 
-    # TODO add back support for MLM sampling
     if mlm_obj is None and not safe_mut:
         x2 = np.random.randint(0, len(tokenizer.sampling_vocab), num_samples)
     elif safe_mut:

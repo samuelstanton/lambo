@@ -3,7 +3,6 @@ pop_size: ${task.batch_size}
 n_offsprings: null
 sampling:
   _target_: bo_protein.optimizers.sampler.CandidateSampler
-#  batch_size: 1
 crossover:
   _target_: pymoo.factory.get_crossover
   name: int_sbx

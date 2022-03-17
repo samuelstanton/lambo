@@ -5,13 +5,10 @@ import time
 import numpy as np
 import torch
 import random
-import math
 
 from torch.nn import functional as F
 
 from pymoo.factory import get_performance_indicator
-
-from sklearn.model_selection import train_test_split
 
 from botorch.utils.multi_objective import infer_reference_point
 
@@ -22,13 +19,12 @@ from bo_protein.utils import weighted_resampling, DataSplit, update_splits, str_
 from bo_protein.models.lanmt import corrupt_tok_idxs
 
 
-class ContinuousOptimizer(object):
+class LaMBO(object):
     def __init__(self, bb_task, tokenizer, encoder, surrogate, acquisition, num_rounds, num_gens,
                  lr, num_opt_steps, concentrate_pool, patience, mask_ratio, resampling_weight,
                  encoder_obj, optimize_latent, position_sampler, entropy_penalty,
                  window_size, latent_init, **kwargs):
 
-        # self.bb_task = bb_task
         self.tokenizer = tokenizer
         self.num_rounds = num_rounds
         self.num_gens = num_gens
@@ -43,7 +39,6 @@ class ContinuousOptimizer(object):
         self.encoder = hydra.utils.instantiate(encoder, tokenizer=tokenizer)
         self.encoder_obj = encoder_obj
 
-        # self.encoder = encoder
         self.surrogate_config = surrogate
         self.surrogate_model = hydra.utils.instantiate(surrogate, tokenizer=self.encoder.tokenizer,
                                                        encoder=self.encoder)
@@ -94,7 +89,6 @@ class ContinuousOptimizer(object):
         self._ref_point = -infer_reference_point(-torch.tensor(norm_pareto_targets)).numpy()
         print(self._ref_point)
         rescaled_ref_point = hypercube_transform.inv_transform(self._ref_point.copy())
-        # print(f'rescaled ref point: {rescaled_ref_point}')
 
         # logging setup
         total_bb_evals = 0
@@ -108,7 +102,6 @@ class ContinuousOptimizer(object):
         print(pd.DataFrame([obj_vals]).to_markdown(floatfmt='.4f'))
 
         for round_idx in range(1, self.num_rounds + 1):
-            # print(f'active pool size: {self.active_targets.shape[0]}, backtrack pool size: {pareto_cand_history.shape[0]}')
             metrics = {}
 
             # contract active pool to current Pareto frontier
@@ -161,8 +154,6 @@ class ContinuousOptimizer(object):
 
             tgt_transform = lambda x: -z_score_transform(x)
             transformed_ref_point = tgt_transform(rescaled_ref_point)
-            # transformed_targets = tgt_transform(target_data)
-            transformed_active_targets = tgt_transform(self.active_targets)
 
             new_split = DataSplit(new_seqs, new_targets)
             holdout_ratio = self.surrogate_model.holdout_ratio
@@ -175,9 +166,6 @@ class ContinuousOptimizer(object):
             X_val, Y_val = self.val_split.inputs, tgt_transform(self.val_split.targets)
             X_test, Y_test = self.test_split.inputs, tgt_transform(self.test_split.targets)
 
-            # self.encoder = hydra.utils.instantiate(self.encoder_config, tokenizer=self.tokenizer)
-            # self.surrogate_model = hydra.utils.instantiate(self.surrogate_config, tokenizer=self.encoder.tokenizer,
-            #                                                encoder=self.encoder)
             records = self.surrogate_model.fit(
                 X_train, Y_train, X_val, Y_val, X_test, Y_test,
                 encoder_obj=self.encoder_obj, resampling_temp=None
@@ -210,14 +198,6 @@ class ContinuousOptimizer(object):
             baseline_seqs, baseline_targets = pareto_frontier(baseline_seqs, baseline_targets)
             baseline_targets = tgt_transform(baseline_targets)
 
-            # roll back pareto frontier one iteration
-            # is_dominated = np.in1d(all_seqs, pareto_seqs, invert=True)
-            # baseline_seqs = all_seqs[is_dominated]
-            # baseline_targets = all_targets[is_dominated]
-            # baseline_seqs, baseline_targets = pareto_frontier(baseline_seqs, baseline_targets)
-            # baseline_targets = tgt_transform(baseline_targets)
-
-            # print(f'{all_seqs.size}, {baseline_seqs.size}, {pareto_seqs.size}')
             acq_fn = hydra.utils.instantiate(
                 self.acquisition,
                 X_baseline=baseline_seqs,
@@ -237,7 +217,6 @@ class ContinuousOptimizer(object):
             new_seq_batches = []
             new_seq_scores = []
             batch_entropy = []
-            # new_tok_batches = []
             for gen_idx in range(self.num_gens):
                 # select candidate sequences to mutate
                 base_idxs = np.random.choice(np.arange(weights.shape[0]), batch_size, p=weights, replace=True)
@@ -275,7 +254,6 @@ class ContinuousOptimizer(object):
                         opt_features, src_mask = self.encoder.get_token_features(src_tok_idxs)
                     elif self.encoder_obj == 'mlm':
                         # this line assumes padding tokens are always added at the end
-                        old_tok_idxs = np.take_along_axis(base_tok_idxs, mask_idxs, axis=1)
                         np.put_along_axis(src_tok_idxs, mask_idxs, self.encoder.tokenizer.masking_idx, axis=1)
                         src_tok_features, src_mask = self.encoder.get_token_features(src_tok_idxs)
                         opt_features = np.take_along_axis(src_tok_features, mask_idxs[..., None], axis=1)
@@ -292,7 +270,6 @@ class ContinuousOptimizer(object):
                 optimizer = torch.optim.Adam(params=[opt_params], lr=self.lr, betas=(0., 1e-2))
                 lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.patience)
                 best_score, best_step = None, 0
-                best_params = opt_params.detach().clone()
                 for step_idx in range(self.num_opt_steps):
                     if self.encoder_obj == 'lanmt':
                         lat_tok_features, pooled_features = self.encoder.pool_features(opt_params, src_mask)
@@ -302,7 +279,6 @@ class ContinuousOptimizer(object):
                         tgt_tok_idxs, logit_entropy = self.encoder.sample_tgt_tok_idxs(
                             tgt_tok_logits, tgt_mask, temp=1.
                         )
-                        new_tok_idxs = tgt_tok_idxs.clone()
                     elif self.encoder_obj == 'mlm':
                         current_features = src_tok_features.clone()
                         np.put_along_axis(current_features, mask_idxs[..., None], opt_params, axis=1)
@@ -325,7 +301,6 @@ class ContinuousOptimizer(object):
 
                     if self.optimize_latent:
                         loss.backward()
-                        # print(f'{lat_acq_vals.mean()}, {opt_params.grad.norm()}')
                         optimizer.step()
                         lr_sched.step(loss)
 
@@ -343,22 +318,14 @@ class ContinuousOptimizer(object):
                         save_weights=False,
                     )
                     if (step_idx + 1) == best_step:
-                        # best_params = opt_params.detach().clone()
                         best_seqs = tgt_seqs.copy()
                         best_entropy = logit_entropy.mean().item()
-                        best_tokens = new_tok_idxs
                     if stop:
                         break
-
-                # old_toks = tokens_to_str(old_tok_idxs, self.encoder.tokenizer)
-                # new_toks = tokens_to_str(best_tokens, self.encoder.tokenizer)
-                # for m, o, n in zip(mask_idxs, old_toks, new_toks):
-                #     print(f'{m}: {o} --> {n}')
 
                 base_cand_batches.append(base_candidates.copy())
                 new_seq_batches.append(best_seqs.copy())
                 new_seq_scores.append(best_score)
-                # new_tok_batches.append(tokens_to_str(new_tokens, self.encoder.tokenizer))
                 batch_entropy.append(best_entropy)
 
                 # print(f'batch {gen_idx + 1}: score - {best_score:0.4f}, entropy - {logit_entropy.mean().item():0.4f}')
@@ -404,7 +371,6 @@ class ContinuousOptimizer(object):
             base_candidates = base_candidates[unique_idxs]
             base_seqs = base_seqs[unique_idxs]
             new_candidates = new_candidates[unique_idxs]
-            # new_tokens = new_tokens[unique_idxs]
 
             # filter redundant candidates
             is_new = np.in1d(new_seqs, all_seqs, invert=True)
@@ -412,7 +378,6 @@ class ContinuousOptimizer(object):
             base_seqs = base_seqs[is_new]
             new_seqs = new_seqs[is_new]
             new_candidates = new_candidates[is_new]
-            # new_tokens = new_tokens[is_new]
             if new_candidates.size == 0:
                 print('no new candidates')
                 continue
@@ -421,8 +386,6 @@ class ContinuousOptimizer(object):
             all_targets = np.concatenate((all_targets, new_targets))
             all_seqs = np.concatenate((all_seqs, new_seqs))
 
-            # print(f'lengthscale: {self.encoder.model.length_transform.lengthscale.item():0.4f}')
-            # print(new_seqs)
             for seq in new_seqs:
                 if hasattr(self.tokenizer, 'to_smiles'):
                     print(self.tokenizer.to_smiles(seq))
@@ -438,13 +401,11 @@ class ContinuousOptimizer(object):
             pool_seqs = np.concatenate((pool_seqs, new_seqs))
 
             # augment active pool with candidates that can be mutated again
-            # mask = self.is_feasible(new_candidates)
             self.active_candidates = np.concatenate((self.active_candidates, new_candidates))
             self.active_targets = np.concatenate((self.active_targets, new_targets))
             self.active_seqs = np.concatenate((self.active_seqs, new_seqs))
 
             # overall Pareto frontier including terminal candidates
-            # old_pareto_targets = pareto_targets.copy()
             pareto_candidates, pareto_targets = pareto_frontier(
                 np.concatenate((pareto_candidates, new_candidates)),
                 np.concatenate((pareto_targets, new_targets)),
@@ -460,8 +421,6 @@ class ContinuousOptimizer(object):
             print(pd.DataFrame([obj_vals]).to_markdown(floatfmt='.4f'))
 
             # store good candidates for backtracking
-            # if np.any(old_pareto_targets != pareto_targets):
-            #     pareto_history.append(pareto_frontier(self.active_candidates, self.active_targets))
             par_is_new = np.in1d(pareto_seqs, pareto_seq_history, invert=True)
             pareto_cand_history = safe_np_cat([pareto_cand_history, pareto_candidates[par_is_new]])
             pareto_seq_history = safe_np_cat([pareto_seq_history, pareto_seqs[par_is_new]])
@@ -476,24 +435,6 @@ class ContinuousOptimizer(object):
             )
 
         return metrics
-
-    # def sample_mask(self, token_batch, enc_tokenizer, mask_size=None):
-    #     # TODO smarter mask sampling
-    #     # mask_size = np.random.randint(1, max_mask_size + 1)
-    #     # mask_size = max_mask_size
-    #     masks = []
-    #     for tokens in token_batch:
-    #         nonviable_mask = np.zeros(tokens.shape).astype(bool)
-    #         for v_tok in self.tokenizer.non_special_vocab:
-    #             tok_idx = enc_tokenizer.convert_token_to_id(v_tok)
-    #             nonviable_mask[tokens.eq(tok_idx)] = 1
-    #         viable_tokens = tokens[nonviable_mask]
-    #
-    #         if mask_size is None:
-    #             mask_size = math.ceil(viable_tokens.shape[0] * self.mask_ratio)
-    #
-    #         masks.append(np.random.choice(viable_tokens, mask_size))
-    #     return np.stack(masks)
 
     def sample_mutation_window(self, window_mask_idxs, window_entropy, temp=1.):
         # selected_features = []

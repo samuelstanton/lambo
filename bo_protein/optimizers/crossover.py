@@ -21,8 +21,6 @@ class BatchCrossover(Crossover):
 
             child_1 = np.concatenate((parent_batches[:1, keep_mask], parent_batches[1:2, ~keep_mask]), axis=-2)
             child_2 = np.concatenate((parent_batches[:1, ~keep_mask], parent_batches[1:2, keep_mask]), axis=-2)
-            # permuted_queries = np.random.permutation(parent_batches.reshape(-1, 3))
-            # child_batches = permuted_queries.reshape(-1, batch_size, 3)
             child_batches = np.concatenate((child_1, child_2))
             child_x = problem.query_batches_to_x(child_batches)
 

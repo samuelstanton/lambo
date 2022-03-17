@@ -45,16 +45,18 @@ optimizer/algorithm=nsga2 task=proxy_rfp optimizer.algorithm.residue_sampler=esm
 
 #### Task options
 - `regex` (default)
-- `proxy_rfp`
+- `chem` (ZINC small molecules, multi-objective)
+- `chem` (ZINC small molecules, single-objective)
+- `proxy_rfp` (FPBase large molecules, multi-objective)
 
 #### Optimizer options
-- `mb_genetic` (default)
+- `lambo` (default)
+- `mb_genetic`
 - `mf_genetic`
 
 #### Algorithm options
-- `nsga2` (default, multi-objective)
 - `soga` (single-objective)
-- `isres` (single-objective)
+- `nsga2` (default, multi-objective)
 
 #### Surrogate options
 - `deep_ensemble` (default)

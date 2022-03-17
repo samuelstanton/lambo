@@ -3,18 +3,15 @@ import torch
 import hydra
 import wandb
 import time
-import random
 import pandas as pd
 
 from botorch.utils.multi_objective import pareto, infer_reference_point
-
-from sklearn.model_selection import train_test_split
 
 from pymoo.factory import get_termination, get_performance_indicator
 from pymoo.optimize import minimize
 
 from bo_protein.tasks import SurrogateTask
-from bo_protein.models.transformers import init_esm, init_bert, ESMObject, MLMWrapper, ESMWrapper, BERTWrapper
+from bo_protein.models.transformers import MLMWrapper, ESMWrapper, BERTWrapper
 from bo_protein.models.lanmt import LANMTWrapper
 from bo_protein.utils import weighted_resampling, DataSplit, update_splits, safe_np_cat
 
@@ -57,8 +54,6 @@ class SequentialGeneticOptimizer(object):
         self.concentrate_pool = concentrate_pool
         self.residue_sampler = residue_sampler
 
-        # from bo_protein.chem_data.utils import CUSTOM_SAMPLING_VOCAB
-        # tokenizer.set_sampling_vocab(CUSTOM_SAMPLING_VOCAB)
         tokenizer.set_sampling_vocab(None, bb_task.max_ngram_size)
         self.tokenizer = tokenizer
 
@@ -70,16 +65,6 @@ class SequentialGeneticOptimizer(object):
         self.active_candidates = None
         self.active_targets = None
         self.resampling_weight = resampling_weight
-
-    # def is_feasible(self, candidate_array):
-    #     if self.bb_task.max_num_edits is not None:
-    #         mask = np.array([
-    #             cand.dist_from_wild < self.bb_task.max_num_edits for cand in candidate_array
-    #         ])
-    #     else:
-    #         mask = np.ones((candidate_array.shape[0],))
-    #
-    #     return mask.astype(bool)
 
     def optimize(self, candidate_pool, pool_targets, all_seqs, all_targets, log_prefix=''):
         batch_size = self.bb_task.batch_size
@@ -112,7 +97,6 @@ class SequentialGeneticOptimizer(object):
         norm_pareto_targets = hypercube_transform(pareto_targets)
         self._ref_point = -infer_reference_point(-torch.tensor(norm_pareto_targets)).numpy()
         rescaled_ref_point = hypercube_transform.inv_transform(self._ref_point)
-        # print(f'rescaled ref point: {rescaled_ref_point}')
 
         # logging setup
         total_bb_evals = 0
@@ -187,8 +171,6 @@ class SequentialGeneticOptimizer(object):
                 self.active_seqs = np.concatenate((self.active_seqs, rand_seqs))
                 print(f'active set augmented with {rand_candidates.shape[0]} random points')
 
-            # assert self.active_seqs.shape[0] == np.unique(self.active_seqs).shape[0]
-
             if self.resampling_weight is None:
                 active_weights = np.ones(self.active_targets.shape[0]) / self.active_targets.shape[0]
             else:
@@ -214,7 +196,6 @@ class SequentialGeneticOptimizer(object):
                 transform=z_score_transform,
                 ref_point=rescaled_ref_point,
                 encoder=encoder,
-                # mlm_obj=mlm_obj,
                 round_idx=round_idx,
                 num_bb_evals=total_bb_evals,
                 start_time=start_time,
@@ -238,11 +219,8 @@ class SequentialGeneticOptimizer(object):
 
             # filter infeasible candidates
             is_feasible = bb_task.is_feasible(new_candidates)
-            # base_candidates = base_candidates[is_feasible]
-            # base_seqs = base_seqs[is_feasible]
             new_seqs = new_seqs[is_feasible]
             new_candidates = new_candidates[is_feasible]
-            # new_tokens = new_tokens[is_feasible]
             if new_candidates.size == 0:
                 print('no new candidates')
                 continue
@@ -278,13 +256,11 @@ class SequentialGeneticOptimizer(object):
                     print(seq)
 
             # augment active pool with candidates that can be mutated again
-            # mask = bb_task.is_feasible(new_candidates)
             self.active_candidates = np.concatenate((self.active_candidates, new_candidates))
             self.active_targets = np.concatenate((self.active_targets, new_targets))
             self.active_seqs = np.concatenate((self.active_seqs, new_seqs))
 
             # overall Pareto frontier including terminal candidates
-            old_pareto_targets = pareto_targets.copy()
             pareto_candidates, pareto_targets = pareto_frontier(
                 np.concatenate((pareto_candidates, new_candidates)),
                 np.concatenate((pareto_targets, new_targets)),
@@ -300,8 +276,6 @@ class SequentialGeneticOptimizer(object):
             obj_vals = {f'obj_val_{i}': pareto_targets[:, i].min() for i in range(self.bb_task.obj_dim)}
             print(pd.DataFrame([obj_vals]).to_markdown(floatfmt='.4f'))
 
-            # if np.any(old_pareto_targets != pareto_targets):
-            #     pareto_history.append(pareto_frontier(self.active_candidates, self.active_targets))
             par_is_new = np.in1d(self.pareto_seqs, pareto_seq_history, invert=True)
             pareto_cand_history = safe_np_cat([pareto_cand_history, pareto_candidates[par_is_new]])
             pareto_seq_history = safe_np_cat([pareto_seq_history, self.pareto_seqs[par_is_new]])
@@ -363,7 +337,6 @@ class ModelFreeGeneticOptimizer(SequentialGeneticOptimizer):
         new_candidates = result.pop.get('X_cand').reshape(-1)
         new_seqs = result.pop.get('X_seq').reshape(-1)
         new_targets = transform.inv_transform(result.pop.get('F'))
-        # bb_evals = result.algorithm.evaluator.n_eval
         bb_evals = self.num_gens * self.algorithm.pop_size
         return new_candidates, new_targets, new_seqs, bb_evals
 
@@ -395,15 +368,12 @@ class ModelBasedGeneticOptimizer(SequentialGeneticOptimizer):
                            encoder, round_idx, num_bb_evals, start_time, log_prefix):
 
         if self.surrogate_model is None:
-            # encoder = hydra.utils.instantiate(self.encoder, mlm_obj=mlm_obj)
             self.surrogate_model = hydra.utils.instantiate(self.surrogate, encoder=encoder, tokenizer=encoder.tokenizer,
                                                            alphabet=self.tokenizer.non_special_vocab)
 
         # prepare surrogate dataset
         tgt_transform = lambda x: -transform(x)
         transformed_ref_point = tgt_transform(ref_point)
-        # transformed_targets = tgt_transform(target_data)
-        transformed_active_targets = tgt_transform(self.active_targets)
 
         new_split = DataSplit(input_data, target_data)
         holdout_ratio = self.surrogate.holdout_ratio
@@ -416,11 +386,6 @@ class ModelBasedGeneticOptimizer(SequentialGeneticOptimizer):
         X_val, Y_val = self.val_split.inputs, tgt_transform(self.val_split.targets)
         X_test, Y_test = self.test_split.inputs, tgt_transform(self.test_split.targets)
 
-        # X_train, X_test, Y_train, Y_test = train_test_split(
-        #     input_data,
-        #     transformed_targets,
-        #     test_size=self.surrogate_model.holdout_ratio,
-        # )
         # train surrogate
         records = self.surrogate_model.fit(
             X_train, Y_train, X_val, Y_val, X_test, Y_test, resampling_temp=None,
@@ -452,13 +417,6 @@ class ModelBasedGeneticOptimizer(SequentialGeneticOptimizer):
         baseline_targets = self.active_targets
         baseline_seqs, baseline_targets = pareto_frontier(baseline_seqs, baseline_targets)
         baseline_targets = tgt_transform(baseline_targets)
-
-        # roll back pareto frontier one iteration
-        # is_dominated = np.in1d(self.all_seqs, self.pareto_seqs, invert=True)
-        # baseline_seqs = self.all_seqs[is_dominated]
-        # baseline_targets = self.all_targets[is_dominated]
-        # baseline_seqs, baseline_targets = pareto_frontier(baseline_seqs, baseline_targets)
-        # baseline_targets = tgt_transform(baseline_targets)
 
         acq_fn = hydra.utils.instantiate(
             self.acquisition,
