@@ -6,7 +6,7 @@ from pymoo.factory import get_mutation
 from pymoo.core.mutation import Mutation
 
 from bo_protein import utils
-from bo_protein.chem_data.utils import prop_func
+from bo_protein.tasks.chem.utils import prop_func
 from bo_protein.models.utils import sample_tokens
 
 

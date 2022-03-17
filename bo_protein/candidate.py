@@ -2,8 +2,8 @@ import copy
 import uuid
 from Bio import PDB
 from pathlib import Path
-from bo_protein.foldx_data.foldx import FoldxManager
-from bo_protein.bp_data.sasa import SurfaceArea
+from bo_protein.tasks.proxy_rfp.foldx import FoldxManager
+from bo_protein.tasks.proxy_rfp.sasa import SurfaceArea
 from Bio.SeqUtils import seq1
 
 from bo_protein.utils import StringSubstitution, StringDeletion, StringInsertion, FoldxMutation
@@ -73,25 +73,6 @@ class StringCandidate:
 
         mutant_seq = tokenizer.decode(mutant_seq).replace(" ", "")
         return mutant_seq
-
-    # def new_mutation(self, seq_idx, mutant_residue, mutation_type='sub'):
-    #     seq_idx = seq_idx % len(self.mutant_residue_seq)
-    #     if mutation_type == 'sub':
-    #         mutation_op = StringSubstitution(
-    #             self.mutant_residue_seq[seq_idx], seq_idx, mutant_residue, self.tokenizer
-    #         )
-    #     elif mutation_type == 'del':
-    #         mutation_op = StringDeletion(
-    #             self.mutant_residue_seq[seq_idx], seq_idx, self.tokenizer
-    #         )
-    #     elif mutation_type == 'ins'
-    #         mutation_op = StringInsertion(
-    #             self.mutant_residue_seq[seq_idx], seq_idx, mutant_residue, self.tokenizer
-    #         )
-    #     else:
-    #         raise RuntimeError('unrecognized mutation op')
-    #
-    #     return mutation_op
 
     def new_candidate(self, mutation_list, tokenizer):
         cand_kwargs = dict(
@@ -213,8 +194,3 @@ class FoldedCandidate:
             dist_from_wild=self.dist_from_wild + len(mutation_ops),
         )
         return FoldedCandidate(**cand_kwargs)
-
-
-# class SMILESCandidate(UnfoldedCandidate):
-#     def apply_mutations(self, mutation_list):
-

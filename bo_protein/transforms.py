@@ -1,10 +1,6 @@
 import torch
 import numpy as np
-from tape import TAPETokenizer, ProteinBertModel
 import random
-import torch.nn.functional as F
-
-from scipy.stats import loguniform
 
 from torch import LongTensor
 
@@ -156,86 +152,3 @@ class RandomMask(object):
             )
             x[mask_idxs] = self.masking_idx
         return x
-
-
-# TODO deprecate
-class BertEmbedTransform:
-    def __init__(self, device=None):
-        self.device = device
-        self.model = ProteinBertModel.from_pretrained("bert-base").eval().to(device)
-
-    def __call__(self, x):
-        x = x[None, :].to(self.device)
-
-        with torch.no_grad():
-            features = self.model(x)[0][0]
-
-        return features.mean(0)
-
-
-# TODO deprecate
-def get_bert_embed_transform(max_len, device):
-    tokenizer = TAPETokenizer(vocab="iupac")
-    token_transform = StringToLongTensor(tokenizer, max_len)
-
-    embed_transform = BertEmbedTransform(device=device)
-    compose_transform = Compose([token_transform, embed_transform])
-
-    return compose_transform
-
-
-# TODO deprecate
-class RandomTranslation(torch.nn.Module):
-    def __init__(self, max_shift=4):
-        super().__init__()
-        self.max_shift = max_shift
-
-    def forward(self, x):
-        if len(x) == 0:
-            return x
-
-        S = self.max_shift
-        if not self.training:
-            return F.pad(x, (S // 2, S // 2), "constant", 0)
-        bs, N = x.shape
-        x = F.pad(x, (S, S), "constant", 0)
-        shifts = np.random.randint(0, S, bs)
-        x = torch.stack([x[i, shifts[i] : shifts[i] + N + S] for i in range(bs)])
-        return x
-
-
-# TODO deprecate
-class RandomErasing1d(torch.nn.Module):
-    def __init__(self, p=0.5, af=1 / 5, max_scale=3):
-        self.p = p
-        self.area_frac = af
-        self.max_scale = max_scale
-        super().__init__()
-
-    def forward(self, x):
-        if self.training:
-            return self.random_erase(x)
-        else:
-            return x
-
-    def random_erase(self, img):
-        bs, n = img.shape
-        area = n
-        target_areas = (
-                loguniform.rvs(1 / self.max_scale, self.max_scale, size=bs)
-                * self.area_frac
-                * area
-        )
-
-        do_erase = np.random.random(bs) < self.p
-        cut_hs = target_areas * do_erase
-        cut_i = np.random.randint(n, size=bs)
-        i = np.arange(n)[None] + np.zeros((bs, n))
-
-        ui = (cut_i + cut_hs / 2)[:, None]
-        li = (cut_i - cut_hs / 2)[:, None]
-        no_erase_mask = ~((li < i) & (i < ui))
-        no_erase_tensor = torch.from_numpy(no_erase_mask.astype(np.float32)).to(
-            img.device
-        )
-        return torch.where(no_erase_tensor > 0, img, 0 * img)

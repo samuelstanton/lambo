@@ -1,6 +1,6 @@
 from Bio import PDB
 from pathlib import Path
-from bo_protein.foldx_data.foldx import FoldxManager
+from bo_protein.tasks.proxy_rfp.foldx import FoldxManager
 from bo_protein.candidate import pdb_to_residues
 from bo_protein.utils import FoldxMutation, RESIDUE_ALPHABET, IntTokenizer
 

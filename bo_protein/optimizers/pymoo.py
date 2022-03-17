@@ -10,7 +10,7 @@ from botorch.utils.multi_objective import pareto, infer_reference_point
 from pymoo.factory import get_termination, get_performance_indicator
 from pymoo.optimize import minimize
 
-from bo_protein.tasks import SurrogateTask
+from bo_protein.tasks.surrogate_task import SurrogateTask
 from bo_protein.models.transformers import MLMWrapper, ESMWrapper, BERTWrapper
 from bo_protein.models.lanmt import LANMTWrapper
 from bo_protein.utils import weighted_resampling, DataSplit, update_splits, safe_np_cat

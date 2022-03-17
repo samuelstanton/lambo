@@ -12,7 +12,7 @@ from scipy.special import softmax
 
 from cachetools import cached, LRUCache
 
-from bo_protein.gfp_data.transforms import padding_collate_fn
+from bo_protein.transforms import padding_collate_fn
 
 AMINO_ACIDS = [
     "A",
@@ -416,3 +416,18 @@ def tokens_to_str(tok_idx_array, tokenizer):
         tokenizer.decode(token_ids).replace(' ', '') for token_ids in tok_idx_array
     ])
     return str_array
+
+
+def apply_mutation(base_seq, mut_pos, mut_res, op_type, tokenizer):
+    tokens = tokenizer.decode(tokenizer.encode(base_seq)).split(" ")[1:-1]
+
+    if op_type == 'sub':
+        mut_seq = "".join(tokens[:mut_pos] + [mut_res] + tokens[(mut_pos + 1):])
+    elif op_type == 'ins':
+        mut_seq = "".join(tokens[:mut_pos] + [mut_res] + tokens[mut_pos:])
+    elif op_type == 'del':
+        mut_seq = "".join(tokens[:mut_pos] + tokens[(mut_pos + 1):])
+    else:
+        raise ValueError('unsupported operation')
+
+    return mut_seq
