@@ -1,1 +1,1 @@
-_target_: bo_protein.chem_data.utils.SELFIESTokenizer
+_target_: lambo.chem_data.utils.SELFIESTokenizer

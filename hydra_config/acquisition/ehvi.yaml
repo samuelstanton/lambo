@@ -1,3 +1,3 @@
-_target_: bo_protein.acquisitions.ehvi.EHVI
+_target_: lambo.acquisitions.ehvi.EHVI
 num_samples: 2
 batch_size: ${task.batch_size}

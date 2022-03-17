@@ -1,1 +1,1 @@
-_target_: bo_protein.utils.ResidueTokenizer
+_target_: lambo.utils.ResidueTokenizer

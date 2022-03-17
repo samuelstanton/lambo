@@ -1,7 +1,7 @@
 import torch
 import random
 
-from bo_protein.transforms import SequenceTranslation
+from lambo.transforms import SequenceTranslation
 
 
 def test_seq_translation():

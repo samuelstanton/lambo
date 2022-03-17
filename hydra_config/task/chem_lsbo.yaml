@@ -1,4 +1,4 @@
-_target_: bo_protein.tasks.chem.chem.ChemTask
+_target_: lambo.tasks.chem.chem.ChemTask
 obj_dim: 1
 obj_properties:
   - penalized_logP

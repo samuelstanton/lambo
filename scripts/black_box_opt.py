@@ -22,7 +22,7 @@ def main(config):
     random.seed(None)  # make sure random seed resets between multirun jobs for random job-name generation
     log_config = flatten_config(OmegaConf.to_container(config, resolve=True), sep='/')
     log_config = {'/'.join(('config', key)): val for key, val in log_config.items()}
-    wandb.init(project='bo-protein', config=log_config, mode=config.wandb_mode,
+    wandb.init(project='lambo', config=log_config, mode=config.wandb_mode,
                group=config.exp_name)
     config['job_name'] = wandb.run.name
     config, _ = startup(config)  # random seed is fixed here

@@ -1,8 +1,8 @@
 from Bio import PDB
 from pathlib import Path
-from bo_protein.tasks.proxy_rfp.foldx import FoldxManager
-from bo_protein.candidate import pdb_to_residues
-from bo_protein.utils import FoldxMutation, RESIDUE_ALPHABET, IntTokenizer
+from lambo.tasks.proxy_rfp.foldx import FoldxManager
+from lambo.candidate import pdb_to_residues
+from lambo.utils import FoldxMutation, RESIDUE_ALPHABET, IntTokenizer
 
 
 class SelectChains(PDB.Select):

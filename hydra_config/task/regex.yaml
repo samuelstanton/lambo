@@ -1,4 +1,4 @@
-_target_: bo_protein.tasks.regex.RegexTask
+_target_: lambo.tasks.regex.RegexTask
 regex_list:
   - "(?=AV)"
   - "(?=VC)"

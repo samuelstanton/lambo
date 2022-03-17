@@ -1,4 +1,4 @@
-_target_: bo_protein.models.deep_ensemble.DeepEnsemble
+_target_: lambo.models.deep_ensemble.DeepEnsemble
 model: mCNN
 model_kwargs:
   embed_dim: 64

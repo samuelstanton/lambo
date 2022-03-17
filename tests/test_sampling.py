@@ -2,7 +2,7 @@ import numpy as np
 
 from scipy.special import softmax
 
-from bo_protein.utils import weighted_resampling
+from lambo.utils import weighted_resampling
 
 
 def test_weighted_resampling():

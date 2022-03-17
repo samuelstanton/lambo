@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from bo_protein.tasks.proxy_rfp.sasa import SurfaceArea
+from lambo.tasks.proxy_rfp.sasa import SurfaceArea
 
 
 def test_sasa_forwards():

@@ -1,1 +1,1 @@
-_target_: bo_protein.chem_data.utils.SMILESTokenizer
+_target_: lambo.chem_data.utils.SMILESTokenizer

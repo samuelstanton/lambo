@@ -1,4 +1,4 @@
-_target_: bo_protein.models.gp_models.SingleTaskExactGP
+_target_: lambo.models.gp_models.SingleTaskExactGP
 max_shift: 4
 mask_size: 0
 bootstrap_ratio: null

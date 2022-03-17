@@ -1,5 +1,5 @@
-from bo_protein.candidate import StringCandidate, StringSubstitution, StringInsertion, StringDeletion
-from bo_protein.utils import mutation_list, IntTokenizer
+from lambo.candidate import StringCandidate, StringSubstitution, StringInsertion, StringDeletion
+from lambo.utils import mutation_list, IntTokenizer
 
 
 def check_candidates(b_seq, n_seq, manual_cand, auto_cand):

@@ -1,4 +1,4 @@
-_target_: bo_protein.models.sskernel_gp_model.SSKExactGP
+_target_: lambo.models.sskernel_gp_model.SSKExactGP
 max_depth: 4
 gap_decay: 0.99
 match_decay: 0.99

@@ -1,4 +1,4 @@
-_target_: bo_protein.optimizers.pymoo.ModelFreeGeneticOptimizer
+_target_: lambo.optimizers.pymoo.ModelFreeGeneticOptimizer
 _recursive_: False
 num_rounds: 32
 num_gens: 2
