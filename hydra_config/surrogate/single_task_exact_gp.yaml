@@ -13,18 +13,8 @@ patience: 32
 eval_period: 2
 feature_dim: 16
 out_dim: ${task.obj_dim}
-#encoder:
-#  _target_: bo_protein.models.nn_models.CNN
-#  dict_size: 25
-#  k: 64
-#  p: 0.
-#  out_dim: ${surrogate.feature_dim}
-#  layernorm: False
 encoder_wd: 1e-4
-#covar_module: null
 covar_module:
-#  _target_: gpytorch.kernels.ScaleKernel
-#  base_kernel:
   _target_: gpytorch.kernels.MaternKernel
   ard_num_dims: ${surrogate.feature_dim}
   batch_shape:
@@ -33,12 +23,6 @@ covar_module:
     _target_: gpytorch.priors.NormalPrior
     loc: 0.7
     scale: 1e-2
-#  batch_shape:
-#    - ${task.obj_dim}
-#  outputscale_prior:
-#    _target_: gpytorch.priors.GammaPrior
-#    concentration: 2.
-#    rate: 4.
 likelihood:
   _target_: gpytorch.likelihoods.GaussianLikelihood
   batch_shape:

@@ -1,6 +1,0 @@
-_target_: bo_protein.models.encoder.LinearEncoder
-name: linear
-out_dim: 16
-embed_dim: 64
-max_len: ${task.max_len}
-batch_size: ${task.batch_size}

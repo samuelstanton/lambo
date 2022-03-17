@@ -431,3 +431,10 @@ def apply_mutation(base_seq, mut_pos, mut_res, op_type, tokenizer):
         raise ValueError('unsupported operation')
 
     return mut_seq
+
+
+def to_cuda(batch):
+    if torch.cuda.is_available():
+        return tuple([x.to("cuda") for x in batch])
+    else:
+        return batch

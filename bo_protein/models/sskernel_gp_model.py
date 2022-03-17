@@ -1,24 +1,21 @@
 import torch
 import numpy as np
-import wandb
 
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.likelihoods import FixedNoiseGaussianLikelihood
-from gpytorch.lazy import BlockDiagLazyTensor
 from gpytorch.distributions import MultivariateNormal, MultitaskMultivariateNormal
 from botorch.posteriors import GPyTorchPosterior
 from gpytorch import settings
 # from gpytorch.lazy import BatchRepeatLazyTensor
 from botorch.models import SingleTaskGP
-from sklearn.model_selection import train_test_split
 
-from ..utils import draw_bootstrap, to_tensor, AMINO_ACIDS, Expression
+from ..utils import AMINO_ACIDS, Expression
 from .sskernel import SSKernel
 from .gp_models import BaseGPSurrogate, SingleTaskExactGP
-from .fit_utils import compute_mll_terms, fit_gp_surrogate
-from .trainer import check_early_stopping
-from ..gfp_data.transforms import padding_collate_fn
-from ..gfp_data import dataset as dataset_util
+from .gp_utils import fit_gp_surrogate
+from bo_protein.transforms import padding_collate_fn
+from bo_protein import dataset as dataset_util
+
 
 class SSKExactGP(SingleTaskExactGP):
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')

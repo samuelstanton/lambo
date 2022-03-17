@@ -32,10 +32,6 @@ data_covar_module:
     _target_: gpytorch.priors.NormalPrior
     loc: 0.7
     scale: 1e-2
-#  lengthscale_prior:
-#    _target_: gpytorch.priors.GammaPrior
-#    concentration: 3.
-#    rate: 6.
 likelihood:
   _target_: gpytorch.likelihoods.MultitaskGaussianLikelihood
   num_tasks: ${task.obj_dim}
@@ -43,7 +39,3 @@ likelihood:
   noise_constraint:
     _target_: gpytorch.constraints.GreaterThan
     lower_bound: 1e-4
-#  noise_prior:
-#    _target_: gpytorch.priors.GammaPrior
-#    concentration: 1.1
-#    rate: 110

@@ -12,9 +12,9 @@ from pymoo.factory import get_performance_indicator
 
 from botorch.utils.multi_objective import infer_reference_point
 
-from bo_protein.models.utils import sample_tokens, evaluate_windows
+from bo_protein.models.mlm import sample_tokens, evaluate_windows
 from bo_protein.optimizers.pymoo import pareto_frontier, Normalizer
-from bo_protein.models.trainer import check_early_stopping
+from bo_protein.models.shared_elements import check_early_stopping
 from bo_protein.utils import weighted_resampling, DataSplit, update_splits, str_to_tokens, tokens_to_str, safe_np_cat
 from bo_protein.models.lanmt import corrupt_tok_idxs
 

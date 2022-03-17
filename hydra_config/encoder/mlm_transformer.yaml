@@ -1,5 +1,5 @@
 _target_: bo_protein.models.lm_elements.LanguageModel
-name: lanmt_transformer
+name: mlm_transformer
 
 model:
   _target_: bo_protein.models.nn_models.Transformer
@@ -12,7 +12,7 @@ model:
   num_layers: 4
   out_dim: 16
   p: 0.1
-  max_len_delta: 4
+  max_len_delta: 0
 
 batch_size: 32
 num_epochs: 128

@@ -20,11 +20,6 @@ num_inducing_points: 64
 learn_inducing_points: True
 encoder_wd: 1e-4
 mll_beta: 1e-2
-#covar_module:
-#  _target_: gpytorch.kernels.MaternKernel
-#  ard_num_dims: ${surrogate.feature_dim}
-#  batch_shape:
-#    - ${task.obj_dim}
 lengthscale_prior:
   _target_: gpytorch.priors.NormalPrior
   loc: ${surrogate.lengthscale_init}
@@ -32,11 +27,3 @@ lengthscale_prior:
 noise_constraint:
   _target_: gpytorch.constraints.GreaterThan
   lower_bound: 1e-4
-#likelihood:
-#  _target_: gpytorch.likelihoods.MultitaskGaussianLikelihood
-#  num_tasks: ${task.obj_dim}
-#  has_global_noise: False
-#  noise_prior:
-#    _target_: gpytorch.priors.GammaPrior
-#    concentration: 1.1
-#    rate: 1100

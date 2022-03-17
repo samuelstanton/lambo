@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class Apply(nn.Module):
@@ -40,9 +39,6 @@ class MaskLayerNorm1d(nn.LayerNorm):
 
         batch_size, num_channels, num_tokens = x.shape
         reshaped_mask = mask[:, None]
-
-        # batch_size, num_tokens, num_channels = x.shape
-        # reshaped_mask = mask[..., None]
 
         sum_dims = list(range(len(x.shape)))[1:]
         xsum = x.sum(dim=sum_dims, keepdims=True)

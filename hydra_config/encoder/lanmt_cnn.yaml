@@ -1,17 +1,16 @@
 _target_: bo_protein.models.lm_elements.LanguageModel
-name: lanmt_transformer
+name: lanmt_cnn
 
 model:
-  _target_: bo_protein.models.nn_models.Transformer
+  _target_: bo_protein.models.nn_models.mCNN
   tokenizer: ${tokenizer}
   max_len: ${task.max_len}
   embed_dim: 64
   latent_dim: 16
-  ff_dim: 256
-  num_heads: 2
-  num_layers: 4
   out_dim: 16
+  kernel_size: 5
   p: 0.1
+  layernorm: True
   max_len_delta: 4
 
 batch_size: 32

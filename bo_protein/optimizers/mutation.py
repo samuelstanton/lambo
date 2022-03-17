@@ -7,7 +7,7 @@ from pymoo.core.mutation import Mutation
 
 from bo_protein import utils
 from bo_protein.tasks.chem.utils import prop_func
-from bo_protein.models.utils import sample_tokens
+from bo_protein.models.mlm import sample_tokens
 
 
 def get_mlm_mutation(mlm_obj, problem, cand_idx, res_idx):

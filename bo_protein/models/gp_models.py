@@ -1,42 +1,22 @@
 import torch
-import torch.nn as nn
 import numpy as np
-import wandb
 import abc
-import math
-import gpytorch
-import copy
-import logging
 
-from collections import OrderedDict
-
-from torch.utils.data import DataLoader
-from torch.nn import functional as F
-from torch.nn.modules.batchnorm import _BatchNorm
-
-from sklearn.model_selection import train_test_split
 from scipy.stats import spearmanr
 
 from botorch.models import SingleTaskGP, SingleTaskVariationalGP, KroneckerMultiTaskGP
-from gpytorch.mlls import ExactMarginalLogLikelihood, VariationalELBO, PredictiveLogLikelihood
-from gpytorch import lazify
-from gpytorch.distributions import MultivariateNormal
+from gpytorch.mlls import ExactMarginalLogLikelihood, VariationalELBO
 from gpytorch.utils.memoize import clear_cache_hook
 from gpytorch import likelihoods, kernels
 
-from bo_protein.utils import RESIDUE_ALPHABET, draw_bootstrap, to_tensor, batched_call, weighted_resampling
-from bo_protein.models.surrogates import SurrogateModel
-from bo_protein.gfp_data import utils as gfp_utils
-from bo_protein.gfp_data import transforms as gfp_transforms
-from bo_protein.models.trainer import quantile_calibration, check_early_stopping
-from bo_protein.models.utils import initialize_var_dist_sgpr
-from bo_protein.models.transformers import mlm_train_epoch, mlm_eval_epoch, mlm_train_step, MLMWrapper
+from bo_protein.models.base_surrogate import BaseSurrogate
+from bo_protein import transforms as gfp_transforms
+from bo_protein.models.metrics import quantile_calibration
 
-from .weight_space_rff_gp import RFFWeightSpaceGP
-from .fit_utils import compute_mll_terms, fit_encoder_only, fit_gp_surrogate
+from .gp_utils import fit_gp_surrogate
 
 
-class BaseGPSurrogate(SurrogateModel, abc.ABC):
+class BaseGPSurrogate(BaseSurrogate, abc.ABC):
     def __init__(self, max_shift, mask_size, gp_lr, enc_lr, bs, num_epochs, holdout_ratio, early_stopping,
                  patience, eval_period, tokenizer, encoder, encoder_wd=0., bootstrap_ratio=None, min_num_train=128,
                  task_noise_init=0.01, lengthscale_init=0.7, *args, **kwargs):
@@ -55,9 +35,6 @@ class BaseGPSurrogate(SurrogateModel, abc.ABC):
         self.lengthscale_init = lengthscale_init
         self.tokenizer = tokenizer
 
-        # tokenizer, data augmentation
-        # tokenizer = bo_protein.utils.RESIDUE_TOKENIZER
-        # self._set_transforms(encoder.tokenizer, max_shift, mask_size)
         self._set_transforms(tokenizer, max_shift, mask_size)
 
     def get_features(self, seq_array, batch_size=None, transform=True):
@@ -152,10 +129,6 @@ class BaseGPSurrogate(SurrogateModel, abc.ABC):
         f_std = torch.cat(f_std, cat_dim).view(len(loader.dataset), -1)
         y_mean = torch.cat(y_mean, cat_dim).view(len(loader.dataset), -1)
         y_std = torch.cat(y_std, cat_dim).view(len(loader.dataset), -1)
-
-        # if not y_mean.shape == targets.shape:
-        #     y_mean = y_mean.transpose(-1, -2)
-        #     y_std = y_std.transpose(-1, -2)
 
         assert y_mean.shape == targets.shape
 
@@ -438,51 +411,3 @@ class SingleTaskSVGP(BaseGPSurrogate, SingleTaskVariationalGP):
             return targets
         else:
             return targets.squeeze(-1)
-
-
-class SingleTaskVRFFGP(SingleTaskSVGP, RFFWeightSpaceGP):
-    def __init__(self, feature_dim, out_dim, encoder, num_samples=100, prior_variance=1.0, likelihood=None,
-                 outcome_transform=None, input_transform=None, lengthscale_prior=None, lengthscale_constraint=None,
-                 *args, **kwargs
-                 ):
-        # initialize common attributes
-        BaseGPSurrogate.__init__(self, encoder=encoder, *args, **kwargs)
-
-        # initialize GP
-        dummy_X = torch.randn(2, feature_dim).to(self.device)
-        dummy_Y = torch.randn(2, out_dim).to(self.device)
-
-        self.base_cls = RFFWeightSpaceGP
-        self.base_cls.__init__(
-            self, 
-            train_X=dummy_X, 
-            train_Y=dummy_Y, 
-            likelihood=likelihood, 
-            num_samples=num_samples,
-            prior_variance=prior_variance,                 
-            outcome_transform=outcome_transform, 
-            input_transform=input_transform,
-            lengthscale_prior=lengthscale_prior,
-            lengthscale_constraint=lengthscale_constraint,
-        )
-        self.likelihood.initialize(noise=self.task_noise_init)
-        self.encoder = encoder.to(self.device)
-        
-    # hacky way to get around the inheritance here
-    def make_error(self):
-        raise AttributeError
-        
-    init_inducing_points = property(make_error)
-
-    def reshape_targets(self, targets):
-        return targets.transpose(-1, -2)
-
-    def predict(self, str_array, num_samples=1, latent=False):
-        samples, mean, std = super().predict(str_array, num_samples=num_samples, latent=latent)
-        return samples.transpose(-1, -2), mean.transpose(-1, -2), std.transpose(-1, -2)
-
-    def set_train_data(self, inputs=None, targets=None, strict=True):
-        pass
-
-    def fit(self, X_train, Y_train, X_val, Y_val, X_test, Y_test, reset=False, log_prefix="single_task_rffgp", **kwargs):
-        return super().fit(X_train, Y_train, X_val, Y_val, X_test, Y_test, reset=reset, log_prefix=log_prefix, **kwargs)

@@ -4,17 +4,22 @@ import math
 import copy
 import logging
 
+from gpytorch import lazify
+from gpytorch.lazy import ConstantDiagLazyTensor
+from gpytorch.settings import cholesky_jitter
+from gpytorch.variational import IndependentMultitaskVariationalStrategy
+
 from torch.utils.data import DataLoader
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from botorch.models import SingleTaskGP, KroneckerMultiTaskGP
 
 from bo_protein.utils import draw_bootstrap, to_tensor, weighted_resampling, batched_call
-from bo_protein.gfp_data import transforms as gfp_transforms
-from bo_protein.models.trainer import check_early_stopping
-from bo_protein.models.utils import initialize_var_dist_sgpr
-from bo_protein.models.transformers import mlm_eval_epoch, mlm_train_step, MLMWrapper
-from bo_protein.models.lanmt import lanmt_eval_epoch, lanmt_train_step, LANMTWrapper
+from bo_protein import transforms as gfp_transforms
+from bo_protein.models.shared_elements import check_early_stopping
+from bo_protein.models.mlm import mlm_train_step, mlm_eval_epoch, MLMWrapper
+from bo_protein.models.lanmt import lanmt_eval_epoch, lanmt_train_step
+from bo_protein.models.lm_elements import LanguageModel
 
 
 def compute_mll_terms(mvn_dist, targets):
@@ -95,7 +100,6 @@ def fit_gp_surrogate(
         X_train, Y_train = draw_bootstrap(
             X_train, Y_train, bootstrap_ratio=surrogate.bootstrap_ratio, min_samples=surrogate.min_num_train
         )
-        # print(f'bootstrap size: {train_inputs.shape[0]}')
 
     # bias data towards 'good' examples
     if resampling_temp is not None:
@@ -110,14 +114,7 @@ def fit_gp_surrogate(
     train_dataset, val_dataset = surrogate._get_datasets(X_train, X_val, Y_train, Y_val)
     _, test_dataset = surrogate._get_datasets(X_train, X_test, Y_train, Y_test)
 
-    # sampler = torch.utils.data.WeightedRandomSampler(train_weights, train_bs, replacement=True)
-    # batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size=train_bs, drop_last=False)
-
     train_loader = DataLoader(train_dataset, batch_size=train_bs, shuffle=shuffle_train, collate_fn=collate_fn)
-    # train_loader = DataLoader(train_dataset, collate_fn=collate_fn, batch_sampler=batch_sampler)
-
-    # mlm_loader = DataLoader(train_dataset, collate_fn=collate_fn, batch_sampler=batch_sampler)
-    mlm_loader = train_loader
 
     eval_bs = max(X_val.shape[0], X_test.shape[0]) if eval_bs is None else eval_bs
     val_loader = DataLoader(val_dataset, batch_size=eval_bs, shuffle=False, collate_fn=collate_fn)
@@ -213,18 +210,18 @@ def fit_gp_surrogate(
 
         avg_train_loss = enc_sup_loss
         surrogate.train()
-        for (mlm_token_batch, _), (inputs, targets) in zip(mlm_loader, train_loader):
+        for inputs, targets in train_loader:
 
             # train encoder through unsupervised MLM objective
-            if isinstance(surrogate.encoder, (MLMWrapper, LANMTWrapper)) and encoder_obj == 'mlm':
+            if isinstance(surrogate.encoder, (MLMWrapper, LanguageModel)) and encoder_obj == 'mlm':
                 surrogate.encoder.requires_grad_(True)
                 mlm_loss, _, _ = mlm_train_step(
-                    surrogate.encoder, gp_optimizer, mlm_token_batch, surrogate.encoder.mask_ratio, loss_scale=1.
+                    surrogate.encoder, gp_optimizer, inputs, surrogate.encoder.mask_ratio, loss_scale=1.
                 )
-            elif isinstance(surrogate.encoder, LANMTWrapper) and encoder_obj == 'lanmt':
+            elif isinstance(surrogate.encoder, LanguageModel) and encoder_obj == 'lanmt':
                 surrogate.encoder.requires_grad_(True)
                 mlm_loss, _, _ = lanmt_train_step(
-                    surrogate.encoder.model, gp_optimizer, mlm_token_batch, loss_scale=1.
+                    surrogate.encoder.model, gp_optimizer, inputs, loss_scale=1.
                 )
             else:
                 mlm_loss = torch.zeros(1, device=surrogate.device)
@@ -310,3 +307,75 @@ def fit_gp_surrogate(
     surrogate.set_train_data(X_train, Y_train, strict=False)
 
     return records
+
+
+def initialize_var_dist_sgpr(model, train_x, train_y, noise_lb):
+    """
+        This is only intended for whitened variational distributions and gaussian likelihoods
+        at present.
+
+        \bar m = L^{-1} m
+        \bar S = L^{-1} S L^{-T}
+
+        where $LL^T = K_{uu}$.
+
+        Thus, the optimal \bar m, \bar S are given by
+        \bar S = L^T (K_{uu} + \sigma^{-2} K_{uv} K_{vu})^{-1} L
+        \bar m = \bar S L^{-1} (K_{uv} y \sigma^{-2})
+    """
+
+    if isinstance(model.model.variational_strategy, IndependentMultitaskVariationalStrategy):
+        ind_pts = model.model.variational_strategy.base_variational_strategy.inducing_points
+        train_y = train_y.transpose(-1, -2).unsqueeze(-1)
+        is_batch_model = True
+    else:
+        ind_pts = model.model.variational_strategy.inducing_points
+        is_batch_model = False
+
+    with cholesky_jitter(1e-4):
+        kuu = model.model.covar_module(ind_pts).double()
+        kuu_chol = kuu.cholesky()
+        kuv = model.model.covar_module(ind_pts, train_x).double()
+
+        # noise = model.likelihood.noise if not is_batch_model else model.likelihood.task_noises.unsqueeze(-1).unsqueeze(-1)
+
+        if hasattr(model.likelihood, 'noise'):
+            noise = model.likelihood.noise
+        elif hasattr(model.likelihood, 'task_noises'):
+            noise = model.likelihood.task_noises.view(-1, 1, 1)
+        else:
+            raise AttributeError
+        noise = noise.clamp(min=noise_lb).double()
+
+        if len(train_y.shape) < len(kuv.shape):
+            train_y = train_y.unsqueeze(-1)
+        if len(noise.shape) < len(kuv.shape):
+            noise = noise.unsqueeze(-1)
+
+        data_term = kuv.matmul(train_y.double()) / noise
+        # mean_term = kuu_chol.inv_matmul(data_term)
+        if is_batch_model:
+            # TODO: clean this up a bit more
+            noise_as_lt = ConstantDiagLazyTensor(noise.squeeze(-1), diag_shape=kuv.shape[-1])
+            inner_prod = kuv.matmul(noise_as_lt).matmul(kuv.transpose(-1, -2))
+            inner_term = inner_prod + kuu
+        else:
+            inner_term = kuv @ kuv.transpose(-1, -2) / noise + kuu
+
+        s_mat = kuu_chol.transpose(-1, -2).matmul(inner_term.inv_matmul(kuu_chol.evaluate()))
+        s_root = lazify(s_mat).cholesky().evaluate()
+        # mean_param = s_mat.matmul(mean_term)
+        # the expression below is less efficient but probably more stable
+        mean_param = kuu_chol.transpose(-1, -2).matmul(inner_term.inv_matmul(data_term))
+
+    mean_param = mean_param.to(train_y)
+    s_root = s_root.to(train_y)
+
+    if not is_batch_model:
+        model.model.variational_strategy._variational_distribution.variational_mean.data = mean_param.data.detach().squeeze()
+        model.model.variational_strategy._variational_distribution.chol_variational_covar.data = s_root.data.detach()
+        model.model.variational_strategy.variational_params_initialized.fill_(1)
+    else:
+        model.model.variational_strategy.base_variational_strategy._variational_distribution.variational_mean.data = mean_param.data.detach().squeeze()
+        model.model.variational_strategy.base_variational_strategy._variational_distribution.chol_variational_covar.data = s_root.data.detach()
+        model.model.variational_strategy.base_variational_strategy.variational_params_initialized.fill_(1)

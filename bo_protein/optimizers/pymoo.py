@@ -11,8 +11,9 @@ from pymoo.factory import get_termination, get_performance_indicator
 from pymoo.optimize import minimize
 
 from bo_protein.tasks.surrogate_task import SurrogateTask
-from bo_protein.models.transformers import MLMWrapper, ESMWrapper, BERTWrapper
-from bo_protein.models.lanmt import LANMTWrapper
+from bo_protein.models.transformers import ESMWrapper, BERTWrapper
+from bo_protein.models.mlm import MLMWrapper
+from bo_protein.models.lm_elements import LanguageModel
 from bo_protein.utils import weighted_resampling, DataSplit, update_splits, safe_np_cat
 
 
@@ -123,7 +124,7 @@ class SequentialGeneticOptimizer(object):
             assert isinstance(encoder, ESMWrapper)
             mlm_obj = encoder
         elif self.residue_sampler == 'mlm':
-            assert isinstance(encoder, (MLMWrapper, LANMTWrapper))
+            assert isinstance(encoder, (MLMWrapper, LanguageModel))
             mlm_obj = encoder
         else:
             raise ValueError
