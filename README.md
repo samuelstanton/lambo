@@ -29,7 +29,8 @@ pip install -e .
 We recommend running NSGA-2 first to test your installation
 
 ```bash
-python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 task=regex tokenizer=protein
+python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 
+task=regex tokenizer=protein
 ```
 
 For the model-based genetic baseline, run
@@ -44,8 +45,8 @@ python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=mlm
 task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
-To evaluate on the multi-objective RFP (large-molecule) or ZINC (small-molecule),
-use the `task=proxy_rfp tokenizer=protein` and `task=chem tokenizer=selfies` overrides,
+To evaluate on the multi-objective RFP (large-molecule) or ZINC (small-molecule) tasks,
+use `task=proxy_rfp tokenizer=protein` and `task=chem tokenizer=selfies`,
 respectively.
 
 To evaluate on the single-objective ZINC task used in papers like
@@ -54,9 +55,9 @@ run
 
 ```bash
 python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt
-task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei
+task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei 
+encoder=lanmt_cnn
 ```
-
 
 
 Below we list significant configuration options.

@@ -196,7 +196,6 @@ class FoldxManager:
     @staticmethod
     def read_result(foldx_dir):
         """Get ddG result from subdir in kcal/mol"""
-        print(foldx_dir)
         try:
             with open(Path(foldx_dir) / "Raw_wt_input_Repair.fxout", "r") as f:
                 mutant_metrics, wild_metrics = f.readlines()[-2:]

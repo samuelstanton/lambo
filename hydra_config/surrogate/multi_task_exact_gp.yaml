@@ -9,7 +9,7 @@ enc_lr: 5e-3
 bs: ${encoder.batch_size}
 eval_bs: ${task.batch_size}
 num_epochs: 256
-holdout_ratio: 0.2
+holdout_ratio: 0.2  # split evenly between val and test
 early_stopping: True
 patience: 32
 eval_period: 2
