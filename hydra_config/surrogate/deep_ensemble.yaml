@@ -5,7 +5,7 @@ model_kwargs:
   latent_dim: 16
   out_dim: ${task.obj_dim}
   kernel_size: 5
-  p: 0.1
+  p: 0.
   layernorm: True
   max_len: ${task.max_len}
   max_len_delta: 0

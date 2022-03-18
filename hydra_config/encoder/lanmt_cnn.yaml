@@ -9,9 +9,9 @@ model:
   latent_dim: 16
   out_dim: 16
   kernel_size: 5
-  p: 0.1
+  p: 0.
   layernorm: True
-  max_len_delta: 4
+  max_len_delta: 8
 
 batch_size: 32
 num_epochs: 128

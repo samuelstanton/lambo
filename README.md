@@ -36,7 +36,7 @@ task=regex tokenizer=protein
 For the model-based genetic baseline, run
 ```bash
 python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga
-task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
+optimizer.encoder_obj=mll task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
 For the full LaMBO algorithm, run
