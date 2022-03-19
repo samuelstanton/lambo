@@ -13,12 +13,14 @@ Copy the contents of the downloaded archive to `~/foldx`.
 You may also need to rename the FoldX executable (e.g. `mv -v ~/foldx/foldx_20221231 ~/foldx/foldx`).
 
 #### RDKit
-[RDKit](https://www.rdkit.org/) is easiest to install if you're using Conda as your package manager (shown below).
+[RDKit](https://www.rdkit.org/) is easiest to install if you're using [Conda](https://docs.conda.io/en/latest/)
+as your package manager (shown below).
 
 
-```
-conda create --name lambo-env python=3.8
-conda install -c conda-forge rdkit
+```bash
+conda create --name lambo-env python=3.8 -y && conda activate lambo-env
+conda install -c conda-forge rdkit -y
+git clone git@github.com:samuelstanton/lambo.git && cd lambo
 pip install -r requirements.txt --upgrade
 pip install -e .
 ```
@@ -35,7 +37,7 @@ task=regex tokenizer=protein
 
 For the model-based genetic baseline, run
 ```bash
-python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga
+python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga 
 optimizer.encoder_obj=mll task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
