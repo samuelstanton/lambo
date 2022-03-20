@@ -18,9 +18,9 @@ as your package manager (shown below).
 
 
 ```bash
+git clone https://github.com/samuelstanton/lambo && cd lambo
 conda create --name lambo-env python=3.8 -y && conda activate lambo-env
 conda install -c conda-forge rdkit -y
-git clone git@github.com:samuelstanton/lambo.git && cd lambo
 pip install -r requirements.txt --upgrade
 pip install -e .
 ```
@@ -31,20 +31,17 @@ pip install -e .
 We recommend running NSGA-2 first to test your installation
 
 ```bash
-python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 
-task=regex tokenizer=protein
+python scripts/black_box_opt.py optimizer=mf_genetic optimizer/algorithm=nsga2 task=regex tokenizer=protein
 ```
 
 For the model-based genetic baseline, run
 ```bash
-python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga 
-optimizer.encoder_obj=mll task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
+python scripts/black_box_opt.py optimizer=mb_genetic optimizer/algorithm=soga optimizer.encoder_obj=mll task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
 For the full LaMBO algorithm, run
 ```bash
-python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=mlm
-task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
+python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=mlm task=regex tokenizer=protein surrogate=multi_task_exact_gp acquisition=nehvi
 ```
 
 To evaluate on the multi-objective RFP (large-molecule) or ZINC (small-molecule) tasks,
@@ -56,9 +53,7 @@ To evaluate on the single-objective ZINC task used in papers like
 run
 
 ```bash
-python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt
-task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei 
-encoder=lanmt_cnn
+python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei encoder=lanmt_cnn
 ```
 
 
