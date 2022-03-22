@@ -23,3 +23,6 @@ transformers==4.6
 networkx==2.6.3
 selfies==2.0.0
 cachetools==5.0.0
+jupyter==1.0.0
+statsmodels==0.13.2
+seaborn==0.11.2

@@ -1,8 +1,18 @@
 # 🏎️🏎️🏎️🏎️
-# LaMBO: Accelerating Bayesian Optimization for Protein Design with Denoising Autoencoders
+# LaMBO: Accelerating Bayesian Optimization for Biological Sequence Design with Denoising Autoencoders
 
-This project uses [Hydra](https://hydra.cc/) for configuration 
-and [Weight and Biases](https://docs.wandb.ai/) for logging.
+## Abstract
+
+Bayesian optimization (BayesOpt) is a gold standard for query-efficient continuous optimization. However, its adoption for drug and antibody sequence design has been hindered by the discrete, high-dimensional nature of the decision variables. 
+We develop a new approach (LaMBO) which jointly trains a denoising autoencoder with a discriminative multi-task Gaussian process head, allowing gradient-based optimization of multi-objective acquisition functions in the latent space of the autoencoder.
+These acquisition functions allow LaMBO to balance the explore-exploit tradeoff over multiple design rounds, and to balance objective tradeoffs by optimizing sequences at many different points on the Pareto frontier.   
+We evaluate LaMBO on a small-molecule task based on the ZINC dataset and introduce a new large-molecule task targeting fluorescent proteins.
+In our experiments LaMBO outperforms genetic optimizers and does not require a large pretraining corpus, demonstrating that BayesOpt is practical and effective for biological sequence design.
+
+
+## Key Results
+
+
 
 ## Installation
 
@@ -25,8 +35,24 @@ pip install -r requirements.txt --upgrade
 pip install -e .
 ```
 
+## Reproducing the figures
+
+[Weight and Biases](https://docs.wandb.ai/) for logging.
+The experimental data used to produce the plots in our papers is available [here](https://wandb.ai/samuelstanton/lambo).
+
+See `./notebooks/plot_pareto_front` for a demonstration of how to reproduce Figure 1.
+
+See `./notebooks/plot_hypervolume` for a demonstration of how to reproduce Figures 3 and 4.
 
 ## Running the code
+
+See `./notebooks/rfp_preprocessing.ipynb` for a demonstration of how to download PDB files from the [RCSB Protein Data Bank](https://www.rcsb.org/)
+and prepare them for use with FoldX.
+
+See `./notebooks/foldx_demo.ipynb` for a demonstration of how to use our Python bindings for FoldX, 
+given a starting sequence with known structure.
+
+This project uses [Hydra](https://hydra.cc/) for configuration when running from the command line.
 
 We recommend running NSGA-2 first to test your installation
 

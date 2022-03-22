@@ -2,7 +2,8 @@ RNAfold
 Dockerfile
 ckpts
 wandb_config
-notebooks
+notebooks/assets
+notebooks/figures
 submit_batch.sh
 chem-env.yml
 lambo/assets/fpbase/Glowcap*
