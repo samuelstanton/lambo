@@ -50,7 +50,7 @@ pip install -e .
 
 ## Reproducing the figures
 
-[Weight and Biases](https://docs.wandb.ai/) for logging.
+This project uses [Weight and Biases](https://docs.wandb.ai/) for logging.
 The experimental data used to produce the plots in our papers is available [here](https://wandb.ai/samuelstanton/lambo).
 
 See `./notebooks/plot_pareto_front` for a demonstration of how to reproduce Figure 1.
