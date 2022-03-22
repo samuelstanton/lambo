@@ -12,7 +12,17 @@ In our experiments LaMBO outperforms genetic optimizers and does not require a l
 
 ## Key Results
 
+BayesOpt can be used to maximize the simulated folding stability (-dG) and solvent-accessible surface area (SASA) of red-spectrum fluorescent proteins.
+Higher is better for both objectives.
+The starting proteins are shown as colored circles, with corresponding optimized offspring shown as crosses.
+Stability correlates with protein function (e.g. how long the protein can fluoresce) while SASA is a proxy for fluorescent intensity.
+
 ![Figure 1](https://github.com/samuelstanton/lambo/blob/main/lambo/assets/figures/lambo_pareto_front.png?raw=true)
+
+On all three tasks (described in Section 5.1 of the paper), LaMBO outperforms genetic algorithm baselines, specifically NSGA-2 and a model-based genetic optimizer with the same surrogate architecture (MTGP + NEHVI + GA). 
+Performance is quantified by the hypervolume bounded by the optimized Pareto frontier.
+The midpoint, lower, and upper bounds of each curve depict the 50\%, 20\%, and 80\% quantiles, estimated from 10 trials. 
+See Section 5.2 in the paper for more discussion.
 
 ![Figure 3](https://github.com/samuelstanton/lambo/blob/main/lambo/assets/figures/lambo_ga_comparison.png?raw=true)
 
