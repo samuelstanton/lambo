@@ -4,9 +4,12 @@ ckpts
 wandb_config
 notebooks/assets
 notebooks/figures
+notebooks/tmp
+lambo/assets/pdb
 submit_batch.sh
 chem-env.yml
 lambo/assets/fpbase/Glowcap*
 lambo/assets/fpbase/proxy-rfp-task*
 hydra_config/hydra/launcher/ray_aws.yaml
 .idea
+*checkpoint.ipynb
