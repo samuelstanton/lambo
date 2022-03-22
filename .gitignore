@@ -3,7 +3,6 @@ Dockerfile
 ckpts
 wandb_config
 notebooks/assets
-notebooks/figures
 notebooks/tmp
 lambo/assets/pdb
 submit_batch.sh

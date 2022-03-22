@@ -12,6 +12,9 @@ In our experiments LaMBO outperforms genetic optimizers and does not require a l
 
 ## Key Results
 
+![Figure 1](https://github.com/samuelstanton/lambo/blob/main/lambo/assets/figures/lambo_pareto_front.png?raw=true)
+
+![Figure 3](https://github.com/samuelstanton/lambo/blob/main/lambo/assets/figures/lambo_ga_comparison.png?raw=true)
 
 
 ## Installation
@@ -127,11 +130,6 @@ Note that any config field can be overridden from the command line, and some con
 - `selfies` (ZINC-derived SELFIES vocab for small molecules)
 - `smiles` (not recommended, ZINC-derived SMILES vocab for small molecules)
 
-
-## Data analysis
-
-See `notebooks/rfp_postprocessing.ipynb` for an example of how to pull down experiment data from
-the wandb servers and analyze the results.
 
 ## Tests
 
