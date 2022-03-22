@@ -3,12 +3,12 @@
 
 ## Abstract
 
-Bayesian optimization (BayesOpt) is a gold standard for query-efficient continuous optimization. However, its adoption for drug and antibody sequence design has been hindered by the discrete, high-dimensional nature of the decision variables. 
+Bayesian optimization (BayesOpt) is a gold standard for query-efficient continuous optimization.
+However, its adoption for drug and antibody sequence design has been hindered by the discrete, high-dimensional nature of the decision variables. 
 We develop a new approach (LaMBO) which jointly trains a denoising autoencoder with a discriminative multi-task Gaussian process head, allowing gradient-based optimization of multi-objective acquisition functions in the latent space of the autoencoder.
-These acquisition functions allow LaMBO to balance the explore-exploit tradeoff over multiple design rounds, and to balance objective tradeoffs by optimizing sequences at many different points on the Pareto frontier.   
+These acquisition functions allow LaMBO to balance the explore-exploit tradeoff over multiple design rounds, and to balance objective tradeoffs by optimizing sequences at many different points on the Pareto frontier.
 We evaluate LaMBO on a small-molecule task based on the ZINC dataset and introduce a new large-molecule task targeting fluorescent proteins.
 In our experiments LaMBO outperforms genetic optimizers and does not require a large pretraining corpus, demonstrating that BayesOpt is practical and effective for biological sequence design.
-
 
 ## Key Results
 
