@@ -1,5 +1,5 @@
 # 🏎️🏎️🏎️🏎️
-# LaMBO: Accelerating Bayesian Optimization for Biological Sequence Design with Denoising Autoencoders
+# LaMBO: [Accelerating Bayesian Optimization for Biological Sequence Design with Denoising Autoencoders](https://arxiv.org/abs/2203.12742)
 
 ## Abstract
 
@@ -151,6 +151,15 @@ This project currently has very limited test coverage.
 
 If you use any part of this code for your own work, please cite
 
-TODO
+```
+@misc{stanton2022accelerating,
+      title={Accelerating Bayesian Optimization for Biological Sequence Design with Denoising Autoencoders}, 
+      author={Samuel Stanton and Wesley Maddox and Nate Gruver and Phillip Maffettone and Emily Delaney and Peyton Greenside and Andrew Gordon Wilson},
+      year={2022},
+      eprint={2203.12742},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 
