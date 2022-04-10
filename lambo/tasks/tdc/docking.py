@@ -1,24 +1,28 @@
+import os
 import numpy as np
+import pandas as pd
 import selfies as sf
+
 from pymoo.core.problem import Problem
+
+from tdc import Oracle
+
+from rdkit import Chem
 
 from lambo.candidate import StringCandidate
 from lambo.tasks.chem.logp import prop_func
-from lambo.tasks.chem.utils import ChemWrapperModule, SELFIESTokenizer
+from lambo.tasks.chem.utils import SELFIESTokenizer
 from lambo.utils import apply_mutation, mutation_list
 
 
-class ChemTask(Problem):
+class DockingTask(Problem):
     # TODO this should be subclassing BaseTask
-    def __init__(self, tokenizer, candidate_pool, obj_dim, obj_properties, num_start_examples=10000,
+    def __init__(self, tokenizer, candidate_pool, obj_dim, pdb_id, obj_properties, num_start_examples=512,
                  transform=lambda x: x, batch_size=1, candidate_weights=None, max_len=74, max_ngram_size=1,
-                 worst_ratio=1., best_ratio=0., allow_len_change=True, **kwargs):
+                 allow_len_change=True, **kwargs):
 
+        assert obj_dim == len(obj_properties), ''
         self.op_types = ['sub', 'ins', 'del'] if allow_len_change else ['sub']
-        if max_len is None:
-            max_len = max([
-                len(tokenizer.encode(cand.mutant_residue_seq)) - 2 for cand in candidate_pool
-            ]) - 1
         if len(candidate_pool) == 0:
             xl = 0.
             xu = 1.
@@ -44,11 +48,12 @@ class ChemTask(Problem):
         self.prop_func = prop_func
         self.obj_properties = obj_properties
         self.obj_dim = obj_dim
+
         self.max_len = max_len
         self.max_ngram_size = max_ngram_size
         self.allow_len_change = allow_len_change
-        self.worst_ratio = worst_ratio
-        self.best_ratio = best_ratio
+        self.pdb_id = pdb_id
+        self.oracles = [Oracle(prop) for prop in obj_properties]
 
     def x_to_query_batches(self, x):
         return x.reshape(-1, self.batch_size, 4)
@@ -56,9 +61,18 @@ class ChemTask(Problem):
     def query_batches_to_x(self, query_batches):
         return query_batches.reshape(-1, self.n_var)
 
-    def task_setup(self, *args, **kwargs):
-        mod = ChemWrapperModule(self.num_start_examples, self.worst_ratio, self.best_ratio)
-        all_seqs, all_targets = mod.sample_dataset(self.obj_properties)
+    def task_setup(self, config, project_root=None, *args, **kwargs):
+        if not os.path.exists('./oracle'):
+            asset_path = os.path.join(project_root, 'lambo/assets/tdc/oracle')
+            os.symlink(asset_path, './oracle')
+
+        zinc_data = pd.read_csv(
+            os.path.join(project_root, 'lambo/assets/zinc_subsample.csv')
+        ).sample(self.num_start_examples)
+        all_seqs = zinc_data.smiles.values
+        all_targets = zinc_data[self.obj_properties].values.reshape(
+            -1, len(self.obj_properties)
+        )
 
         if isinstance(self.tokenizer, SELFIESTokenizer):
             all_seqs = np.array(
@@ -68,7 +82,6 @@ class ChemTask(Problem):
         base_candidates = np.array([
             StringCandidate(seq, mutation_list=[], tokenizer=self.tokenizer) for seq in all_seqs
         ]).reshape(-1)
-        # all_targets = self.score(base_candidates)
 
         base_targets = all_targets.copy()
         return base_candidates, base_targets, all_seqs, all_targets
@@ -101,13 +114,28 @@ class ChemTask(Problem):
         else:
             smiles_strings = str_array
 
-        scores = [self.prop_func(s, self.obj_properties) for s in smiles_strings]
-        scores = -np.array(scores).astype(np.float64)
+        scores = []
+        for smls_str in smiles_strings:
+            str_score = [float('inf') for _ in self.oracles]
+            for idx, orcl in enumerate(self.oracles):
+                try:
+                    str_score[idx] = orcl(smls_str)
+                except:
+                    pass
+            scores.append(str_score)
+        scores = np.array(scores).astype(np.float64)
         return scores
 
     def is_feasible(self, candidates):
-        scores = self.score(candidates)
-        is_valid_mol = (scores[:, 0] < 100).reshape(-1)
+        str_array = np.array([cand.mutant_residue_seq for cand in candidates])
+        if isinstance(self.tokenizer, SELFIESTokenizer):
+            smiles_strings = list(map(sf.decoder, str_array))
+        else:
+            smiles_strings = str_array
+
+        is_valid_mol = np.array([
+            (Chem.MolFromSmiles(s) is not None) for s in smiles_strings
+        ])
         in_length = np.array([len(cand) <= self.max_len for cand in candidates]).reshape(-1)
         is_feasible = (is_valid_mol * in_length)
         return is_feasible

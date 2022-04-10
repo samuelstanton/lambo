@@ -148,6 +148,14 @@ class LaMBO(object):
                 self.active_seqs = np.concatenate((self.active_seqs, rand_seqs))
                 print(f'active set augmented with {rand_candidates.shape[0]} random points')
 
+            print(rescaled_ref_point)
+            print(self.active_targets)
+            for seq in self.active_seqs:
+                if hasattr(self.tokenizer, 'to_smiles'):
+                    print(self.tokenizer.to_smiles(seq))
+                else:
+                    print(seq)
+
             print('\n---- fitting surrogate model ----')
             # acquisition fns assume maximization so we normalize and negate targets here
             z_score_transform = Normalizer(all_targets.mean(0), all_targets.std(0))

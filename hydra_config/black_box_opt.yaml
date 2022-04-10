@@ -11,7 +11,7 @@ defaults:
 seed: ${trial_id}
 trial_id: 0
 project_name: lambo
-version: v0.2.0
+version: v0.2.1
 
 # Directories for loading and storing data
 data_dir: data/experiments

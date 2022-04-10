@@ -7,25 +7,22 @@ from lambo.utils import mutation_list
 class BaseTask(Problem):
     def __init__(self, tokenizer, candidate_pool, obj_dim, transform=lambda x: x, batch_size=1,
                  candidate_weights=None, max_len=None, max_ngram_size=1, allow_len_change=True, **kwargs):
+        self.op_types = ['sub', 'ins', 'del'] if allow_len_change else ['sub']
+        if max_len is None:
+            max_len = max([
+                len(tokenizer.encode(cand.mutant_residue_seq)) - 2 for cand in candidate_pool
+            ]) - 1
         if len(candidate_pool) == 0:
             xl = 0.
             xu = 1.
         else:
-            max_len = max([
-                len(tokenizer.encode(cand.mutant_residue_seq)) - 2 for cand in candidate_pool
-            ]) - 1
-            self.op_types = ['sub', 'ins', 'del']
-            if len(candidate_pool) == 0:
-                xl = 0.
-                xu = 1.
-            else:
-                xl = np.array([0] * 4 * batch_size)
-                xu = np.array([
-                    len(candidate_pool) - 1,  # base seq choice
-                    2 * max_len,  # seq position choice
-                    len(tokenizer.sampling_vocab) - 1,  # token choice
-                    len(self.op_types) - 1,  # op choice
-                ] * batch_size)
+            xl = np.array([0] * 4 * batch_size)
+            xu = np.array([
+                len(candidate_pool) - 1,  # base seq choice
+                2 * max_len,  # seq position choice
+                len(tokenizer.sampling_vocab) - 1,  # token choice
+                len(self.op_types) - 1,  # op choice
+            ] * batch_size)
 
         n_var = 4 * batch_size
         super().__init__(

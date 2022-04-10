@@ -1,0 +1,13 @@
+_target_: lambo.tasks.tdc.docking.DockingTask
+obj_dim: 2
+pdb_id: 3pbl
+obj_properties:
+  - ${task.pdb_id}_docking
+  - SA
+log_prefix: ${task.pdb_id}_docking
+num_start_examples: 512
+batch_size: 16
+max_num_edits: null
+max_len: 128 # max number of SELFIES tokens
+max_ngram_size: 1
+allow_len_change: True
