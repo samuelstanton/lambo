@@ -8,12 +8,11 @@ from lambo.utils import random_proteins, apply_mutation, mutation_list
 
 
 class RegexTask(BaseTask):
-    def __init__(self, regex_list, min_len, max_len, num_start_examples, tokenizer,
+    def __init__(self, regex_list, min_len, num_start_examples, tokenizer,
                  candidate_pool, obj_dim, transform=lambda x: x, **kwargs):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
         self.regex_list = regex_list
         self.min_len = min_len
-        self.max_len = max_len
         self.num_start_examples = num_start_examples
 
     def task_setup(self, *args, **kwargs):

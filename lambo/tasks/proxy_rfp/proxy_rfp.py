@@ -9,10 +9,9 @@ from lambo.tasks.base_task import BaseTask
 
 
 class ProxyRFPTask(BaseTask):
-    def __init__(self, max_len, tokenizer, candidate_pool, obj_dim, transform=lambda x: x,
+    def __init__(self, tokenizer, candidate_pool, obj_dim, transform=lambda x: x,
                  num_start_examples=1024, **kwargs):
         super().__init__(tokenizer, candidate_pool, obj_dim, transform, **kwargs)
-        self.max_len = max_len
         self.op_types = ["sub"]
         self.num_start_examples = num_start_examples
 
