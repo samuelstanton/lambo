@@ -49,6 +49,7 @@ See the linked README for installation instructions.
 git clone https://github.com/samuelstanton/lambo && cd lambo
 conda create --name lambo-env python=3.8 -y && conda activate lambo-env
 conda install -c conda-forge rdkit -y
+conda install -c conda-forge pytdc pdbfixer openbabel
 pip install -r requirements.txt --upgrade
 pip install -e .
 ```
