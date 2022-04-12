@@ -40,6 +40,11 @@ You may also need to rename the FoldX executable (e.g. `mv -v ~/foldx/foldx_2022
 as your package manager (shown below).
 
 
+#### TDC
+[TDC](https://github.com/mims-harvard/TDC) is required to run the DRD3 docking task.
+See the linked README for installation instructions.
+
+
 ```bash
 git clone https://github.com/samuelstanton/lambo && cd lambo
 conda create --name lambo-env python=3.8 -y && conda activate lambo-env
@@ -133,6 +138,7 @@ Note that any config field can be overridden from the command line, and some con
 - `regex_easy` (maximize counts of 2 tokens)
 - `chem` (ZINC small molecules, maximize LogP and QED)
 - `chem_lsbo` (ZINC small molecules, maximize penalized LogP)
+- `tdc_docking` (ZINC small molecules, minimize DRD3 docking affinity and synthetic accessibility)
 - `proxy_rfp` (FPBase large molecules, maximize stability and SASA)
 
 #### Tokenizer options
