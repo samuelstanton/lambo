@@ -26,3 +26,5 @@ cachetools==5.0.0
 jupyter==1.0.0
 statsmodels==0.13.2
 seaborn==0.11.2
+vina==1.2.3
+pyscreener==1.2.0

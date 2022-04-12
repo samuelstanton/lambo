@@ -35,7 +35,12 @@ class Normalizer(object):
         self.scale = np.where(scale != 0, scale, 1.)
 
     def __call__(self, arr):
-        return (arr - self.loc) / self.scale
+        min_val = self.loc - 4 * self.scale
+        max_val = self.loc + 4 * self.scale
+        clipped_arr = np.clip(arr, a_min=min_val, a_max=max_val)
+        norm_arr = (clipped_arr - self.loc) / self.scale
+
+        return norm_arr
 
     def inv_transform(self, arr):
         return self.scale * arr + self.loc
@@ -214,6 +219,7 @@ class SequentialGeneticOptimizer(object):
             is_feasible = bb_task.is_feasible(new_candidates)
             new_seqs = new_seqs[is_feasible]
             new_candidates = new_candidates[is_feasible]
+            new_targets = new_targets[is_feasible]
             if new_candidates.size == 0:
                 print('no new candidates')
                 continue
