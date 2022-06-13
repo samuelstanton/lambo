@@ -216,7 +216,9 @@ class SequentialGeneticOptimizer(object):
             total_bb_evals += bb_evals
 
             # filter infeasible candidates
-            is_feasible = bb_task.is_feasible(new_candidates)
+            is_finite = (new_targets < np.inf).prod(-1).astype(bool)
+            is_feasible = bb_task.is_feasible(new_candidates).astype(bool)
+            is_feasible *= is_finite
             new_seqs = new_seqs[is_feasible]
             new_candidates = new_candidates[is_feasible]
             new_targets = new_targets[is_feasible]
@@ -425,7 +427,8 @@ class ModelBasedGeneticOptimizer(SequentialGeneticOptimizer):
             ref_point=torch.tensor(transformed_ref_point).to(self.surrogate_model.device),
             obj_dim=self.bb_task.obj_dim,
         )
-        inner_task = SurrogateTask(self.tokenizer, candidate_pool, acq_fn, batch_size=acq_fn.batch_size)
+        inner_task = SurrogateTask(self.tokenizer, candidate_pool, acq_fn, batch_size=acq_fn.batch_size,
+                                   allow_len_change=self.bb_task.allow_len_change)
 
         return inner_task
 
