@@ -1,0 +1,14 @@
+_target_: lambo.tasks.chem.chem.ChemTask
+obj_dim: 2
+obj_properties:
+  - penalized_logP
+  - qed
+log_prefix: plogp_qed
+num_start_examples: 512
+batch_size: 16
+max_num_edits: null
+max_len: 128 # max number of SELFIES tokens in ZINC
+max_ngram_size: 1
+allow_len_change: True
+worst_ratio: 1.
+best_ratio: 0.
