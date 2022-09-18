@@ -11,10 +11,14 @@ from torch.utils.data import DataLoader
 import lambo.utils
 from lambo import dataset as dataset_util
 from lambo.models.base_surrogate import BaseSurrogate
-from lambo.models.shared_elements import check_early_stopping
-from lambo.models.surrogates import model_dict
+from lambo.models.shared_elements import check_early_stopping, mCNN
 from lambo.transforms import padding_collate_fn
 from lambo.utils import to_cuda
+
+
+MODEL_DICT = {
+    'mCNN': mCNN,
+}
 
 
 class DeepEnsemble(BaseSurrogate):
@@ -25,7 +29,7 @@ class DeepEnsemble(BaseSurrogate):
 
         self._set_transforms(tokenizer, max_shift, mask_size)
 
-        network_constr = model_dict[model]
+        network_constr = MODEL_DICT[model]
         model_kwargs.update(dict(tokenizer=tokenizer))
 
         trainer = EnsembleComponentTrainer(
