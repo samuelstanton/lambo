@@ -58,8 +58,21 @@ class IntTokenizer:
 
     @cached(cache=LRUCache(maxsize=int(1e4)))
     def encode(self, seq):
-        seq = ["[CLS]"] + list(seq) + ["[SEP]"]
-        return [self.convert_token_to_id(c) for c in seq]
+        tokens = ["[CLS]"]
+        buffer = []
+        for char in seq:
+            if char == '[':
+                buffer.append(char)
+            elif char == ']':
+                buffer.append(char)
+                tokens.append(''.join(buffer))
+                buffer = []
+            elif len(buffer) > 0:
+                buffer.append(char)
+            else:
+                tokens.append(char)
+        tokens.append("[SEP]")
+        return [self.convert_token_to_id(tok) for tok in tokens]
 
     def decode(self, token_ids):
         if isinstance(token_ids, int):
