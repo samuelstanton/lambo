@@ -11,10 +11,11 @@ from lambo.models.metrics import quantile_calibration
 class BaseSurrogate(torch.nn.Module):
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
-    def _set_transforms(self, tokenizer, max_shift, mask_size):
+    def _set_transforms(self, tokenizer, max_shift, mask_size, train_prepend=None):
         # convert from string to LongTensor of token indexes
         # don't use the max_len arg here, will interfere with the translation augmentation
-        train_transform = [transforms.StringToLongTensor(tokenizer, max_len=None)]
+        train_transform = [] if train_prepend is None else train_prepend
+        train_transform += [transforms.StringToLongTensor(tokenizer, max_len=None)]
         # randomly substitute masking tokens
         if mask_size > 0:
             train_transform.append(

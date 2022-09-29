@@ -24,10 +24,11 @@ MODEL_DICT = {
 class DeepEnsemble(BaseSurrogate):
     def __init__(self, tokenizer, model, model_kwargs, lr, bs, weight_decay,
                  ensemble_size, max_shift, mask_size, num_epochs, eval_period,
-                 bootstrap_ratio, holdout_ratio, early_stopping, patience, min_num_train, **kwargs):
+                 bootstrap_ratio, holdout_ratio, early_stopping, patience, min_num_train, 
+                 custom_train_transforms=None, **kwargs):
         super().__init__()
 
-        self._set_transforms(tokenizer, max_shift, mask_size)
+        self._set_transforms(tokenizer, max_shift, mask_size, custom_train_transforms)
 
         network_constr = MODEL_DICT[model]
         model_kwargs.update(dict(tokenizer=tokenizer))
