@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 import sys
 
@@ -24,7 +24,7 @@ setup(
     author_email="ss13641@nyu.edu",
     url="https://github.com/samuelstanton/lambo.git",
     license="Apache-2.0",
-    packages=["lambo"],
+    packages=find_packages(),
     include_package_data=True,
     classifiers=[
         "Development Status :: 3",
