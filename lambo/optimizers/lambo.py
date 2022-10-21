@@ -270,7 +270,8 @@ class LaMBO(object):
 
                     # initialize latent token-choice decision variables
                     opt_params = torch.empty(
-                        *opt_features.shape, requires_grad=self.optimize_latent, device=self.surrogate_model.device
+                        *opt_features.shape, requires_grad=self.optimize_latent, device=self.surrogate_model.device,
+                        dtype=self.surrogate_model.dtype
                     )
                     opt_params.copy_(opt_features)
 

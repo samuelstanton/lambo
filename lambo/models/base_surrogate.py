@@ -10,6 +10,7 @@ from lambo.models.metrics import quantile_calibration
 
 class BaseSurrogate(torch.nn.Module):
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+    dtype = torch.float
 
     def _set_transforms(self, tokenizer, max_shift, mask_size, train_prepend=None):
         # convert from string to LongTensor of token indexes
@@ -36,9 +37,9 @@ class BaseSurrogate(torch.nn.Module):
 
     def _get_datasets(self, X_train, X_test, Y_train, Y_test):
         if isinstance(Y_train, np.ndarray):
-            Y_train = torch.from_numpy(Y_train).float()
+            Y_train = torch.from_numpy(Y_train).to(self.dtype)
         if isinstance(Y_test, np.ndarray):
-            Y_test = torch.from_numpy(Y_test).float()
+            Y_test = torch.from_numpy(Y_test).to(self.dtype)
 
         train_dataset = dataset_util.TransformTensorDataset(
             [X_train, Y_train], self.train_transform

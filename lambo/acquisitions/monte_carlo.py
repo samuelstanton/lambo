@@ -43,9 +43,10 @@ class qDiscreteNEHVI(qNoisyExpectedHypervolumeImprovement):
     ):
         model.eval()
         mocked_features = model.get_features(X_baseline, model.bs)
+        ref_point = ref_point.to(mocked_features)
         # for string kernels
         if mocked_features.ndim > 2:
-            mocked_features = mocked_features[..., 0].to(ref_point) # doint let this fail
+            mocked_features = mocked_features[..., 0] # don't let this fail
 
         super().__init__(
             model=model,

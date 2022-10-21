@@ -50,10 +50,10 @@ class LayerNorm(nn.Module):  # type: ignore
 
 
 def pool_features(tokens, token_features, ignore_idxs):
-	mask = torch.ones_like(tokens).float()
+	mask = torch.ones_like(tokens, dtype=torch.float)
 	for idx in ignore_idxs:
 		mask *= tokens.ne(idx)
-	mask = mask.unsqueeze(-1).float()
+	mask = mask.unsqueeze(-1).to(token_features)
 	pooled_features = (mask * token_features).sum(-2) / (mask.sum(-2) + 1e-6)
 
 	return pooled_features

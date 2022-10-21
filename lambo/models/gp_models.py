@@ -218,14 +218,14 @@ class SingleTaskExactGP(BaseGPSurrogate, SingleTaskGP):
         BaseGPSurrogate.__init__(self, encoder=encoder, *args, **kwargs)
 
         # initialize GP
-        dummy_X = torch.randn(2, feature_dim).to(self.device)
-        dummy_Y = torch.randn(2, out_dim).to(self.device)
-        covar_module = covar_module if covar_module is None else covar_module.to(self.device)
+        dummy_X = torch.randn(2, feature_dim).to(self.device, self.dtype)
+        dummy_Y = torch.randn(2, out_dim).to(self.device, self.dtype)
+        covar_module = covar_module if covar_module is None else covar_module.to(self.device, self.dtype)
         SingleTaskGP.__init__(
             self, dummy_X, dummy_Y, likelihood, covar_module, outcome_transform, input_transform
         )
         self.likelihood.initialize(noise=self.task_noise_init)
-        self.encoder = encoder.to(self.device)
+        self.encoder = encoder.to(self.device, self.dtype)
 
     def clear_cache(self):
         self.train()
@@ -273,15 +273,15 @@ class MultiTaskExactGP(BaseGPSurrogate, KroneckerMultiTaskGP):
         BaseGPSurrogate.__init__(self, encoder=encoder, *args, **kwargs)
 
         # initialize GP
-        dummy_X = torch.randn(2, feature_dim).to(self.device)
-        dummy_Y = torch.randn(2, out_dim).to(self.device)
-        covar_module = covar_module if covar_module is None else covar_module.to(self.device)
+        dummy_X = torch.randn(2, feature_dim).to(self.device, self.dtype)
+        dummy_Y = torch.randn(2, out_dim).to(self.device, self.dtype)
+        covar_module = covar_module if covar_module is None else covar_module.to(self.device, self.dtype)
         KroneckerMultiTaskGP.__init__(
             self, dummy_X, dummy_Y, likelihood, covar_module=covar_module, outcome_transform=outcome_transform,
             input_transform=input_transform, *args, **kwargs
         )
         self.likelihood.initialize(task_noises=self.task_noise_init)
-        self.encoder = encoder.to(self.device)
+        self.encoder = encoder.to(self.device, self.dtype)
 
     def forward(self, X):
         features = self.get_features(X, self.bs) if isinstance(X, np.ndarray) else X
@@ -351,15 +351,15 @@ class SingleTaskSVGP(BaseGPSurrogate, SingleTaskVariationalGP):
             likelihood.initialize(task_noises=self.task_noise_init)
 
         # initialize GP
-        dummy_X = 2 * (torch.rand(num_inducing_points, feature_dim).to(self.device) - 0.5)
-        dummy_Y = torch.randn(num_inducing_points, out_dim).to(self.device)
-        covar_module = covar_module if covar_module is None else covar_module.to(self.device)
+        dummy_X = 2 * (torch.rand(num_inducing_points, feature_dim).to(self.device, self.dtype) - 0.5)
+        dummy_Y = torch.randn(num_inducing_points, out_dim).to(self.device, self.dtype)
+        covar_module = covar_module if covar_module is None else covar_module.to(self.device, self.dtype)
 
         self.base_cls = SingleTaskVariationalGP
         self.base_cls.__init__(self, dummy_X, dummy_Y, likelihood, out_dim, learn_inducing_points,
                                          covar_module=covar_module, inducing_points=dummy_X,
                                          outcome_transform=outcome_transform, input_transform=input_transform)
-        self.encoder = encoder.to(self.device)
+        self.encoder = encoder.to(self.device, self.dtype)
         self.mll_beta = mll_beta
 
     def clear_cache(self):

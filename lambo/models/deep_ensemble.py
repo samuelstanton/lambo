@@ -60,9 +60,9 @@ class DeepEnsemble(BaseSurrogate):
     def fit(self, X_train, Y_train, X_val, Y_val, X_test, Y_test, reset=False, log_prefix="deep_ens", **kwargs):
         super().fit(X_train, Y_train)
         if isinstance(Y_train, np.ndarray):
-            Y_train = torch.from_numpy(Y_train).float()
+            Y_train = torch.from_numpy(Y_train).to(self.dtype)
         if isinstance(Y_test, np.ndarray):
-            Y_test = torch.from_numpy(Y_test).float()
+            Y_test = torch.from_numpy(Y_test).to(self.dtype)
 
         print(f'{X_train.shape[0]} train, {X_val.shape[0]} val, {X_test.shape[0]} test')
 
@@ -135,7 +135,7 @@ class DeepEnsemble(BaseSurrogate):
 
         if Y is not None:
             if isinstance(Y, np.ndarray):
-                Y = torch.from_numpy(Y).float()
+                Y = torch.from_numpy(Y).to(self.dtype)
 
             dataset = dataset_util.TransformTensorDataset([X, Y], self.test_transform)
             loader = torch.utils.data.DataLoader(
