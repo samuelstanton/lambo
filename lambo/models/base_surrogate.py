@@ -63,8 +63,14 @@ class BaseSurrogate(torch.nn.Module):
         except AssertionError:
             import pdb; pdb.set_trace()
         mean, std, labels = mean.cpu(), std.cpu(), labels.cpu()
-        nll = -torch.distributions.Normal(mean, std).log_prob(labels).mean()
-        ece = quantile_calibration(mean, std, labels)["ece"]
+        if torch.any(torch.isnan(std)):
+            nll = float('NaN')
+            ece = float('NaN')
+            post_var = float('NaN')
+        else:
+            nll = -torch.distributions.Normal(mean, std).log_prob(labels).mean().item()
+            ece = quantile_calibration(mean, std, labels)["ece"]
+            post_var = (std ** 2).mean().item()
 
         if mean.ndim == 1:
             mean = mean.unsqueeze(-1)
@@ -75,11 +81,11 @@ class BaseSurrogate(torch.nn.Module):
             spearman_rho += spearmanr(labels[..., idx], mean[..., idx]).correlation / labels.size(-1)
 
         metrics = {
-            f"{split}_nll": nll.item(),
+            f"{split}_nll": nll,
             f"{split}_rmse": np.sqrt(np.power(mean - labels, 2).mean()).item(),
             f"{split}_s_rho": spearman_rho,
             f"{split}_ece": ece,
-            f"{split}_post_var": (std ** 2).mean().item()
+            f"{split}_post_var": post_var,
         }
 
         if len(log_prefix) > 0:
