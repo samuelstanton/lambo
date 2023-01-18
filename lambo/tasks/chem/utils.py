@@ -173,11 +173,16 @@ class SMILESTokenizer:
 
 
 class SELFIESTokenizer(IntTokenizer):
-    def __init__(self, smiles_data=None):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
+    def __init__(
+            self,
+            dir_path=None,
+            selfies_vocab="selfies_vocab.txt",
+            smiles_data=None,
+        ):
+        dir_path = os.path.dirname(os.path.realpath(__file__)) if dir_path is None else dir_path
         if smiles_data is None:
             try:
-                with open(os.path.join(dir_path, "selfies_vocab.txt"), 'r') as fd:
+                with open(os.path.join(dir_path, selfies_vocab), 'r') as fd:
                     non_special_vocab = [x.strip() for x in fd.readlines()]
             except FileNotFoundError:
                 smiles_df = pd.read_csv(os.path.join(dir_path, "smiles.csv"))

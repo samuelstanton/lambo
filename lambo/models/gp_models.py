@@ -82,7 +82,7 @@ class BaseGPSurrogate(BaseSurrogate, abc.ABC):
             pred_std = pred_std.unsqueeze(-1)
         elif not pred_mean.shape[:-1] == batch_shape:
             pred_mean = pred_mean.transpose(-1, -2)
-            pred_std = pred_mean.transpose(-1, -2)
+            pred_std = pred_std.transpose(-1, -2)
         else:
             pass
         assert pred_mean.shape[:-1] == batch_shape, f'{pred_mean.shape[:-1]} != {batch_shape}'
