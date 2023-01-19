@@ -91,6 +91,14 @@ class BaseGPSurrogate(BaseSurrogate, abc.ABC):
         samples = diag_dist.sample((num_samples,))
         return samples, pred_mean, pred_std
 
+    def predict_mvn(self, inputs, latent=False):
+        self.eval()
+        with torch.inference_mode():
+            features = self.get_features(inputs, self.bs) if isinstance(inputs, np.ndarray) else inputs
+            pred_dist = self(features)
+            pred_dist = pred_dist if latent else self.likelihood(pred_dist)
+        return pred_dist
+
     def evaluate(self, loader, split="", *args, **kwargs):
         self.eval()
         targets, y_mean, y_std, f_std = [], [], [], []

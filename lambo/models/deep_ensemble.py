@@ -64,7 +64,8 @@ class DeepEnsemble(BaseSurrogate):
         if isinstance(Y_test, np.ndarray):
             Y_test = torch.from_numpy(Y_test).to(self.dtype)
 
-        print(f'{X_train.shape[0]} train, {X_val.shape[0]} val, {X_test.shape[0]} test')
+        num_val = 0 if X_val is None else X_val.shape[0]
+        print(f'{X_train.shape[0]} train, {num_val} val, {X_test.shape[0]} test')
 
         _train_dataset, _test_dataset = self._get_datasets(X_train, X_test, Y_train, Y_test)
         _, _val_dataset = self._get_datasets(X_train, X_val, Y_train, Y_val)

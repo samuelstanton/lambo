@@ -90,9 +90,11 @@ def fit_gp_surrogate(
     log_prefix="",
     encoder_obj='mll',
     resampling_temp=None,
+    select_crit_key="val_nll",
 ):
     assert encoder_obj in ['mll', 'mlm', 'lanmt', None], 'unsupported encoder objective'
-    print(f'{X_train.shape[0]} train, {X_val.shape[0]} val, {X_test.shape[0]} test')
+    num_val = 0 if X_val is None else X_val.shape[0]
+    print(f'{X_train.shape[0]} train, {num_val} val, {X_test.shape[0]} test')
 
     if surrogate.bootstrap_ratio is None and X_train.shape[0] >= surrogate.min_num_train:
         pass
@@ -111,13 +113,19 @@ def fit_gp_surrogate(
 
     collate_fn = lambda x: gfp_transforms.padding_collate_fn(x, surrogate.tokenizer.padding_idx)
     train_bs = X_train.shape[0] if train_bs is None else train_bs
-    train_dataset, val_dataset = surrogate._get_datasets(X_train, X_val, Y_train, Y_val)
-    _, test_dataset = surrogate._get_datasets(X_train, X_test, Y_train, Y_test)
+    if num_val > 0:
+        _, val_dataset = surrogate._get_datasets(X_train, X_val, Y_train, Y_val)
+    else:
+        val_dataset = None
+    train_dataset, test_dataset = surrogate._get_datasets(X_train, X_test, Y_train, Y_test)
 
     train_loader = DataLoader(train_dataset, batch_size=train_bs, shuffle=shuffle_train, collate_fn=collate_fn)
 
     eval_bs = max(X_val.shape[0], X_test.shape[0]) if eval_bs is None else eval_bs
-    val_loader = DataLoader(val_dataset, batch_size=eval_bs, shuffle=False, collate_fn=collate_fn)
+    if val_dataset is not None:
+        val_loader = DataLoader(val_dataset, batch_size=eval_bs, shuffle=False, collate_fn=collate_fn)
+    else:
+        val_loader = None
     test_loader = DataLoader(test_dataset, batch_size=eval_bs, shuffle=False, collate_fn=collate_fn)
 
     # prepare train targets to be passed to `surrogate.set_train_data`
@@ -136,24 +144,29 @@ def fit_gp_surrogate(
     surrogate.eval()
     surrogate.requires_grad_(False)
     surrogate.set_train_data(X_train, Y_train, strict=False)
-    start_metrics = surrogate.evaluate(val_loader, split='val')
+    if val_loader is not None:
+        start_metrics = surrogate.evaluate(val_loader, split='val')
+    else:
+        start_metrics = {}
     start_metrics.update(surrogate.evaluate(test_loader, split='test'))
     start_metrics['epoch'] = 0
 
     if has_encoder and encoder_obj == 'mlm':
-        start_metrics.update(mlm_eval_epoch(surrogate.encoder, val_loader, surrogate.encoder.mask_ratio, split='val'))
+        if val_loader is not None:
+            start_metrics.update(mlm_eval_epoch(surrogate.encoder, val_loader, surrogate.encoder.mask_ratio, split='val'))
         start_metrics.update(mlm_eval_epoch(surrogate.encoder, test_loader, surrogate.encoder.mask_ratio, split='test'))
     if has_encoder and encoder_obj == 'lanmt':
-        start_metrics.update(lanmt_eval_epoch(surrogate.encoder.model, val_loader, split='val'))
+        if val_loader is not None:
+            start_metrics.update(lanmt_eval_epoch(surrogate.encoder.model, val_loader, split='val'))
         start_metrics.update(lanmt_eval_epoch(surrogate.encoder.model, test_loader, split='test'))
 
-    select_crit_key = 'val_nll'
-    best_score = start_metrics[select_crit_key]
+    best_score = start_metrics.get(select_crit_key, None)
     best_score_epoch = 0
     surrogate.cpu()  # avoid storing two copies of the weights on GPU
     best_weights = copy.deepcopy(surrogate.state_dict())
     surrogate.to(surrogate.device)
-    print(f'starting val NLL: {best_score:.4f}')
+    if best_score is not None:
+        print(f'starting val NLL: {best_score:.4f}')
 
     if any([isinstance(module, _BatchNorm) for module in surrogate.encoder.modules()]):
         print('\n---- initializing encoder normalization buffers ----')
@@ -245,14 +258,16 @@ def fit_gp_surrogate(
             # update train features, use unaugmented train data for evaluation
             surrogate.eval()
             surrogate.set_train_data(X_train, Y_train, strict=False)
-
-            metrics.update(surrogate.evaluate(val_loader, split='val'))
+            if val_loader is not None:
+                metrics.update(surrogate.evaluate(val_loader, split='val'))
             metrics.update(surrogate.evaluate(test_loader, split='test'))
             if has_encoder and encoder_obj == 'mlm':
-                metrics.update(mlm_eval_epoch(surrogate.encoder, val_loader, surrogate.encoder.mask_ratio, split='val'))
+                if val_loader is not None:
+                    metrics.update(mlm_eval_epoch(surrogate.encoder, val_loader, surrogate.encoder.mask_ratio, split='val'))
                 metrics.update(mlm_eval_epoch(surrogate.encoder, test_loader, surrogate.encoder.mask_ratio, split='test'))
             elif has_encoder and encoder_obj == 'lanmt':
-                metrics.update(lanmt_eval_epoch(surrogate.encoder.model, val_loader, split='val'))
+                if val_loader is not None:
+                    metrics.update(lanmt_eval_epoch(surrogate.encoder.model, val_loader, split='val'))
                 metrics.update(lanmt_eval_epoch(surrogate.encoder.model, test_loader, split='test'))
 
         # use validation NLL for model selection
