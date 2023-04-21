@@ -4,7 +4,8 @@ mask_size: 0
 bootstrap_ratio: null
 min_num_train: 128
 task_noise_init: 1e-2
-lr: 1e-2
+gp_lr: 5e-3
+enc_lr: 5e-3
 bs: 128
 num_epochs: 512
 holdout_ratio: 0.2

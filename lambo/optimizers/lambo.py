@@ -280,6 +280,7 @@ class LaMBO(object):
                 lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.patience)
                 best_score, best_step = None, 0
                 for step_idx in range(self.num_opt_steps):
+                    opt_params.grad = None
                     if self.encoder_obj == 'lanmt':
                         lat_tok_features, pooled_features = self.encoder.pool_features(opt_params, src_mask)
                         tgt_tok_logits, tgt_mask = self.encoder.logits_from_features(

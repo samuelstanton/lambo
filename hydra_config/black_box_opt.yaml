@@ -20,6 +20,7 @@ job_name: null
 timestamp: ${now:%Y-%m-%d_%H-%M-%S}
 log_dir: ${data_dir}/${exp_name}
 wandb_mode: online
+wandb_host: https://api.wandb.ai
 
 hydra:
   run:
