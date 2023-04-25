@@ -98,7 +98,7 @@ To evaluate on the single-objective ZINC task used in papers like
 run
 
 ```bash
-python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei encoder=lanmt_cnn
+python scripts/black_box_opt.py optimizer=lambo optimizer.encoder_obj=lanmt task=chem_lsbo tokenizer=selfies surrogate=single_task_svgp acquisition=ei encoder=lanmt_cnn surrogate.holdout_ratio=0.1 surrogate.bs=256 surrogate.eval_bs=256 optimizer.resampling_weight=0.5 optimizer.window_size=8
 ```
 
 

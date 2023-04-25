@@ -279,6 +279,10 @@ class LaMBO(object):
                 optimizer = torch.optim.Adam(params=[opt_params], lr=self.lr, betas=(0., 1e-2))
                 lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.patience)
                 best_score, best_step = None, 0
+
+                best_scores = acq_fn(base_seqs[..., None])
+                best_seqs = base_seqs
+
                 for step_idx in range(self.num_opt_steps):
                     opt_params.grad = None
                     if self.encoder_obj == 'lanmt':
@@ -306,7 +310,9 @@ class LaMBO(object):
                     else:
                         raise ValueError
 
-                    lat_acq_vals = acq_fn(pooled_features.unsqueeze(0))
+                    # import pdb; pdb.set_trace()
+                    lat_acq_vals = acq_fn(pooled_features.unsqueeze(-2))
+                    # lat_acq_vals = acq_fn(pooled_features.unsqueeze(0))
                     loss = -lat_acq_vals.mean() + self.entropy_penalty * logit_entropy.mean()
 
                     if self.optimize_latent:
@@ -315,22 +321,35 @@ class LaMBO(object):
                         lr_sched.step(loss)
 
                     tgt_seqs = tokens_to_str(tgt_tok_idxs, self.encoder.tokenizer)
-                    act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
+                    with torch.no_grad():
+                        act_acq_vals = acq_fn(tgt_seqs[..., None])
+                    # act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
+
+                    is_improved = (act_acq_vals >= best_scores)
+                    best_scores = torch.where(is_improved, act_acq_vals, best_scores)
+                    best_seqs = np.where(is_improved.cpu().numpy(), tgt_seqs, best_seqs)
+                    # best_scores[is_improved] = act_acq_vals[is_improved]
+                    # best_seqs[is_improved] = tgt_seqs[is_improved]
+
+                    with torch.no_grad():
+                        batch_acq_val = acq_fn(best_seqs[None, :]).mean().item()
+                    curr_score = -1.0 * batch_acq_val
 
                     best_score, best_step, _, stop = check_early_stopping(
                         model=None,
                         best_score=best_score,
                         best_epoch=best_step,
                         best_weights=None,
-                        curr_score=-act_acq_vals,
+                        curr_score=curr_score,
                         curr_epoch=step_idx + 1,
                         patience=self.patience,
                         save_weights=False,
                     )
                     if (step_idx + 1) == best_step:
-                        best_seqs = tgt_seqs.copy()
+                        # best_seqs = tgt_seqs.copy()
                         best_entropy = logit_entropy.mean().item()
                     if stop:
+                        print(f"Early stopping at step {step_idx + 1}")
                         break
 
                 base_cand_batches.append(base_candidates.copy())
