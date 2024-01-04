@@ -322,7 +322,7 @@ class LaMBO(object):
 
                     tgt_seqs = tokens_to_str(tgt_tok_idxs, self.encoder.tokenizer)
                     with torch.no_grad():
-                        act_acq_vals = acq_fn(tgt_seqs[None,])
+                        act_acq_vals = acq_fn(tgt_seqs[None, :])
                     # act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
 
                     is_improved = (act_acq_vals >= best_scores)
