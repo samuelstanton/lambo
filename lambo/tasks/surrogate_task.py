@@ -25,6 +25,5 @@ class SurrogateTask(BaseTask):
             candidates.append(mutant_seq)
         candidates = np.array(candidates).reshape(*batch_shape)  # (pop_size, batch_size)
         with torch.inference_mode():
-            acq_vals = self.acq_fn(candidates).cpu().numpy().reshape(*batch_shape)
-        acq_vals = np.mean(acq_vals, axis=1, keepdims=True)
+            acq_vals = self.acq_fn(candidates).cpu().numpy()
         out["F"] = -acq_vals
