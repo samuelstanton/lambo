@@ -280,7 +280,7 @@ class LaMBO(object):
                 lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.patience)
                 best_score, best_step = None, 0
 
-                best_scores = acq_fn(base_seqs[None, :])
+                best_scores = acq_fn(base_seqs[..., None])
                 best_seqs = base_seqs
 
                 for step_idx in range(self.num_opt_steps):
@@ -322,7 +322,7 @@ class LaMBO(object):
 
                     tgt_seqs = tokens_to_str(tgt_tok_idxs, self.encoder.tokenizer)
                     with torch.no_grad():
-                        act_acq_vals = acq_fn(tgt_seqs[None, :])
+                        act_acq_vals = acq_fn(tgt_seqs[..., None])
                     # act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
 
                     is_improved = (act_acq_vals >= best_scores)
