@@ -19,7 +19,6 @@ class SurrogateTask(BaseTask):
             cand_idx, mut_pos, mut_res_idx, op_idx = query_pt
             op_type = self.op_types[op_idx]
             base_seq = self.candidate_pool[cand_idx].mutant_residue_seq
-            mut_pos = mut_pos % len(base_seq)
             mut_res = self.tokenizer.sampling_vocab[mut_res_idx]
             mutant_seq = apply_mutation(base_seq, mut_pos, mut_res, op_type, self.tokenizer)
             candidates.append(mutant_seq)
