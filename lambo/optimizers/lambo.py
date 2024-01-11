@@ -333,7 +333,7 @@ class LaMBO(object):
                         save_weights=False,
                     )
                     if (step_idx + 1) == best_step:
-                        # best_seqs = tgt_seqs.copy()
+                        best_seqs = tgt_seqs.copy()
                         best_entropy = logit_entropy.mean().item()
                     if stop:
                         print(f"Early stopping at step {step_idx + 1}")
