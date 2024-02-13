@@ -71,18 +71,19 @@ class qDiscreteNEHVI(qNoisyExpectedHypervolumeImprovement):
             baseline_X = self._X_baseline
             baseline_X = baseline_X.expand(*X.shape[:-2], -1, -1)
             X_full = torch.cat([baseline_X, X], dim=-2)
+            q = X.shape[-2]
         else:
             baseline_X = copy(self.X_baseline_string) # ensure contiguity
             baseline_X.resize(
                 baseline_X.shape[:-(X.ndim)] + X.shape[:-1] + baseline_X.shape[-1:]
             )
             X_full = concatenate([baseline_X, X], axis=-1)
+            q = X.shape[-1]
         # Note: it is important to compute the full posterior over `(X_baseline, X)``
         # to ensure that we properly sample `f(X)` from the joint distribution `
         # `f(X_baseline, X) ~ P(f | D)` given that we can already fixed the sampled
         # function values for `f(X_baseline)`
         posterior = self.model.posterior(X_full)
-        q = X.shape[-2]
         self._set_sampler(q=q, posterior=posterior)
         samples = self.sampler(posterior)[..., -q:, :]
         # add previous nehvi from pending points

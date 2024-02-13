@@ -432,7 +432,8 @@ def tokens_to_str(tok_idx_array, tokenizer):
 
 
 def apply_mutation(base_seq, mut_pos, mut_res, op_type, tokenizer):
-    tokens = tokenizer.decode(tokenizer.encode(base_seq)).split(" ")[1:-1]
+    tokens = tokenizer.decode(tokenizer.encode(base_seq)).split(" ")
+    mut_pos = mut_pos % len(tokens)
 
     if op_type == 'sub':
         mut_seq = "".join(tokens[:mut_pos] + [mut_res] + tokens[(mut_pos + 1):])

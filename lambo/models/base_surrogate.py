@@ -10,7 +10,7 @@ from lambo.models.metrics import quantile_calibration
 
 class BaseSurrogate(torch.nn.Module):
     device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-    dtype = torch.float
+    dtype = torch.double
 
     def _set_transforms(self, tokenizer, max_shift, mask_size, train_prepend=None):
         # convert from string to LongTensor of token indexes

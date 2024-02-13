@@ -310,9 +310,7 @@ class LaMBO(object):
                     else:
                         raise ValueError
 
-                    # import pdb; pdb.set_trace()
-                    lat_acq_vals = acq_fn(pooled_features.unsqueeze(-2))
-                    # lat_acq_vals = acq_fn(pooled_features.unsqueeze(0))
+                    lat_acq_vals = acq_fn(pooled_features.unsqueeze(0))
                     loss = -lat_acq_vals.mean() + self.entropy_penalty * logit_entropy.mean()
 
                     if self.optimize_latent:
@@ -322,31 +320,20 @@ class LaMBO(object):
 
                     tgt_seqs = tokens_to_str(tgt_tok_idxs, self.encoder.tokenizer)
                     with torch.no_grad():
-                        act_acq_vals = acq_fn(tgt_seqs[..., None])
-                    # act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
-
-                    is_improved = (act_acq_vals >= best_scores)
-                    best_scores = torch.where(is_improved, act_acq_vals, best_scores)
-                    best_seqs = np.where(is_improved.cpu().numpy(), tgt_seqs, best_seqs)
-                    # best_scores[is_improved] = act_acq_vals[is_improved]
-                    # best_seqs[is_improved] = tgt_seqs[is_improved]
-
-                    with torch.no_grad():
-                        batch_acq_val = acq_fn(best_seqs[None, :]).mean().item()
-                    curr_score = -1.0 * batch_acq_val
+                        act_acq_vals = acq_fn(tgt_seqs[None, :]).mean().item()
 
                     best_score, best_step, _, stop = check_early_stopping(
                         model=None,
                         best_score=best_score,
                         best_epoch=best_step,
                         best_weights=None,
-                        curr_score=curr_score,
+                        curr_score=-act_acq_vals,
                         curr_epoch=step_idx + 1,
                         patience=self.patience,
                         save_weights=False,
                     )
                     if (step_idx + 1) == best_step:
-                        # best_seqs = tgt_seqs.copy()
+                        best_seqs = tgt_seqs.copy()
                         best_entropy = logit_entropy.mean().item()
                     if stop:
                         print(f"Early stopping at step {step_idx + 1}")
