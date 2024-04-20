@@ -26,6 +26,14 @@ See Section 5.2 in the paper for more discussion.
 
 ![Figure 3](https://github.com/samuelstanton/lambo/blob/main/lambo/assets/figures/lambo_ga_comparison.png?raw=true)
 
+### UPDATE 04/20/2024
+An open-source contribution identified some subtle bugs that hurt performance of all methods substantially on some tasks. 
+[The proposed fix has been merged](https://github.com/samuelstanton/lambo/pull/13) and therefore the current master commit will now produce better results than originally reported.
+If you wish to reproduce the original curves in the paper, check out [the following commit](https://github.com/samuelstanton/lambo/commit/431b052ad0e54a1ba4519272725310127c6377f1)
+```bash
+git checkout 431b052
+```
+
 
 ## Installation
 
