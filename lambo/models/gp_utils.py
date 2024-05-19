@@ -204,6 +204,15 @@ def fit_gp_surrogate(
     stop = False
 
     if True: 
+        import os
+        
+        seq_fn = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'lambo_rep_seqs.txt'
+        )
+        with open(seq_fn, 'r') as f:
+            seqs = f.readlines()
+        
         unlabeled_dataset = dataset_util.TransformTensorDataset(
             (seqs,[None] * len(seqs)), None
         )
