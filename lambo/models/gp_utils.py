@@ -203,6 +203,30 @@ def fit_gp_surrogate(
     best_loss, best_loss_epoch = None, 0
     stop = False
 
+    if True: 
+        unlabeled_dataset = dataset_util.TransformTensorDataset(
+            (seqs,[None] * len(seqs)), None
+        )
+        unlabeled_loader = DataLoader(unlabeled_dataset, batch_size=train_bs, shuffle=shuffle_train, collate_fn=collate_fn)
+
+        optimizer = torch.optim.Adam(surrogate.param_groups)
+        lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, patience=math.ceil(surrogate.patience / 2.), threshold=1e-3
+        )
+
+        for epoch_idx in range(surrogate.num_epochs):
+            metrics = {}
+
+            surrogate.train()
+            for inputs, targets in unlabeled_loader:
+
+                # train encoder through unsupervised MLM objective
+                if isinstance(surrogate.encoder, LanguageModel) and encoder_obj == 'mlm':
+                    surrogate.encoder.requires_grad_(True)
+                    mlm_loss, _, _ = mlm_train_step(
+                        surrogate.encoder, optimizer, inputs, surrogate.encoder.mask_ratio, loss_scale=1.
+                    )
+
     gp_optimizer = torch.optim.Adam(surrogate.param_groups)
     gp_lr_sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
         gp_optimizer, patience=math.ceil(surrogate.patience / 2.), threshold=1e-3
